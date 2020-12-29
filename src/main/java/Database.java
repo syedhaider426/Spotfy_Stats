@@ -3,6 +3,7 @@ import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
@@ -17,14 +18,11 @@ import com.wrapper.spotify.model_objects.specification.AudioFeatures;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Database {
-    private DynamoDB db;
-    private DynamoDBMapper mapper;
+    final private DynamoDB db;
+    final private DynamoDBMapper mapper;
 
     public Database() {
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder
@@ -56,13 +54,28 @@ public class Database {
 
     }
 
+    public void deleteTable(){
+        Table table = db.getTable("Song");
+        try {
+            System.out.println("Attempting to delete table; please wait...");
+            table.delete();
+            table.waitForDelete();
+            System.out.print("Success.");
+
+        }
+        catch (Exception e) {
+            System.err.println("Unable to delete table: ");
+            System.err.println(e.getMessage());
+        }
+    }
+
     public void createArtistTable() {
         try {
             System.out.println("Attempting to create table; please wait...");
             String tableName = "Artist";
             Table table = db.createTable(tableName,
-                    Arrays.asList(new KeySchemaElement("artist", KeyType.HASH)),
-                    Arrays.asList(new AttributeDefinition("artist", ScalarAttributeType.S)),
+                    Collections.singletonList(new KeySchemaElement("artist", KeyType.HASH)),
+                    Collections.singletonList(new AttributeDefinition("artist", ScalarAttributeType.S)),
                     new ProvisionedThroughput(10L, 10L));
             table.waitForActive();
             System.out.println("Success.  Table status: " + table.getDescription().getTableStatus());
@@ -81,7 +94,7 @@ public class Database {
         ObjectMapper objectMapper = new ObjectMapper();
         List<Map<String, Object>> myObjects = objectMapper.readValue(file, new TypeReference<>(){});
         List<Artist> artists = new ArrayList<>();
-        for (Map map : myObjects) {
+        for (Map<String,Object> map : myObjects) {
             Artist artist = new Artist();
             artist.setArtist((String) map.get("Artist"));
             artist.setSpotifyId((String) map.get("SpotifyID"));
@@ -89,6 +102,16 @@ public class Database {
         }
         mapper.batchSave(artists);
         System.out.println("Added artists to database");
+    }
+
+    public Map<String,String> getArtists(){
+        Map<String,String> artists = new HashMap<>();
+        DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
+        List<Artist> scanResult = mapper.scan(Artist.class,scanExpression);
+        for(Artist artist: scanResult){
+            artists.put(artist.getArtist(),artist.getSpotifyId());
+        }
+        return artists;
     }
 
     public Song createSong(String artist, String track, String releaseDate, String externalUrl, AudioFeatures audioFeatures) {
@@ -107,12 +130,16 @@ public class Database {
         song.setTempo(audioFeatures.getTempo());
         song.setUri(audioFeatures.getId());
         song.setValence(audioFeatures.getValence());
+        song.setHidden(false);
         System.out.println(song);
         System.out.println("-------------");
         return song;
     }
 
-    public void saveSong(ArrayList<Song> songs) {
+    public void saveSong(List<Song> songs) {
         mapper.batchSave(songs);
     }
+
+
+
 }

@@ -1,7 +1,6 @@
 
 import com.neovisionaries.i18n.CountryCode;
 import com.wrapper.spotify.SpotifyApi;
-import com.wrapper.spotify.SpotifyApi.Builder;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.credentials.ClientCredentials;
 import com.wrapper.spotify.model_objects.specification.AlbumSimplified;
@@ -20,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
+
 import org.apache.hc.core5.http.ParseException;
 
 public class Spotify {
@@ -75,18 +76,19 @@ public class Spotify {
 
     public List<String> getAlbumTracks(String artistName, List<String> albumReleases) {
         System.out.println("Loading tracks");
+        String name = artistName.toLowerCase();
         List<String> tracksList = new ArrayList<>();
         try {
             for(String albumRelease: albumReleases){
-                GetAlbumsTracksRequest getAlbumsTracksRequest = this.spotifyApi.getAlbumsTracks(albumRelease).build();
+                GetAlbumsTracksRequest getAlbumsTracksRequest = spotifyApi.getAlbumsTracks(albumRelease).build();
                 Paging<TrackSimplified> trackSimplifiedPaging = getAlbumsTracksRequest.execute();
                 TrackSimplified[] items = trackSimplifiedPaging.getItems();
                 for(TrackSimplified item: items) {
                     ArtistSimplified[] artistsSimplified = item.getArtists();
                     for(ArtistSimplified artist: artistsSimplified) {
-                        if (artist.getName().equals(artistName)) {
+                        if (artist.getName().toLowerCase().equals(name)) {
                             String song = item.getName().toLowerCase();
-                            if(!song.contains("Remix") || song.contains(artistName)) {
+                            if(!song.contains("remix") || song.contains(artistName)) {
                                 tracksList.add(item.getId());
                                 break;
                             }
@@ -94,7 +96,6 @@ public class Spotify {
                     }
                 }
             }
-
             System.out.println("Ending tracks");
             return tracksList;
         } catch (SpotifyWebApiException | IOException | ParseException ex) {
@@ -122,8 +123,11 @@ public class Spotify {
                 trackList.addAll(Arrays.asList(audioFeatures));
                 x += 90;
             }
+            List<AudioFeatures> audioFeaturesList =  trackList.stream()
+                    .filter(p -> p != null)
+                    .collect(Collectors.toList());
             System.out.println("Ending track features");
-            return trackList;
+            return audioFeaturesList;
         } catch (SpotifyWebApiException | IOException | ParseException ex) {
             ex.printStackTrace();
             return null;

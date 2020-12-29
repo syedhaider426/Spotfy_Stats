@@ -1,7 +1,5 @@
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIgnore;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
+import com.amazonaws.services.dynamodbv2.datamodeling.*;
 
 @DynamoDBTable(tableName = "Song")
 public class Song {
@@ -19,6 +17,7 @@ public class Song {
     private float speechiness;
     private float valence;
     private float tempo;
+    private boolean hidden;
 
     public Song() {
     }
@@ -32,7 +31,7 @@ public class Song {
         this.artist = artist;
     }
 
-    @DynamoDBHashKey(attributeName = "song")
+    @DynamoDBAttribute(attributeName = "song")
     public String getSong() {
         return song;
     }
@@ -41,7 +40,7 @@ public class Song {
         this.song = song;
     }
 
-    @DynamoDBHashKey(attributeName = "song")
+    @DynamoDBRangeKey(attributeName = "releaseDate")
     public String getReleaseDate() {
         return releaseDate;
     }
@@ -50,7 +49,7 @@ public class Song {
         this.releaseDate = releaseDate;
     }
 
-    @DynamoDBHashKey(attributeName = "uri")
+    @DynamoDBAttribute(attributeName = "uri")
     public String getUri() {
         return uri;
     }
@@ -59,7 +58,7 @@ public class Song {
         this.uri = uri;
     }
 
-    @DynamoDBHashKey(attributeName = "link")
+    @DynamoDBAttribute(attributeName = "link")
     public String getLink() {
         return this.link;
     }
@@ -68,7 +67,7 @@ public class Song {
         this.link = link;
     }
 
-    @DynamoDBHashKey(attributeName = "acousticness")
+    @DynamoDBAttribute(attributeName = "acousticness")
     public float getAcousticness() {
         return acousticness;
     }
@@ -77,7 +76,7 @@ public class Song {
         this.acousticness = acousticness;
     }
 
-    @DynamoDBHashKey(attributeName = "danceability")
+    @DynamoDBAttribute(attributeName = "danceability")
     public float getDanceability() {
         return danceability;
     }
@@ -86,7 +85,7 @@ public class Song {
         this.danceability = danceability;
     }
 
-    @DynamoDBHashKey(attributeName = "energy")
+    @DynamoDBAttribute(attributeName = "energy")
     public float getEnergy() {
         return energy;
     }
@@ -95,7 +94,7 @@ public class Song {
         this.energy = energy;
     }
 
-    @DynamoDBHashKey(attributeName = "instrumentalness")
+    @DynamoDBAttribute(attributeName = "instrumentalness")
     public float getInstrumentalness() {
         return instrumentalness;
     }
@@ -104,7 +103,7 @@ public class Song {
         this.instrumentalness = instrumentalness;
     }
 
-    @DynamoDBHashKey(attributeName = "liveness")
+    @DynamoDBAttribute(attributeName = "liveness")
     public float getLiveness() {
         return liveness;
     }
@@ -113,7 +112,7 @@ public class Song {
         this.liveness = liveness;
     }
 
-    @DynamoDBHashKey(attributeName = "loudness")
+    @DynamoDBAttribute(attributeName = "loudness")
     public float getLoudness() {
         return loudness;
     }
@@ -122,7 +121,7 @@ public class Song {
         this.loudness = loudness;
     }
 
-    @DynamoDBHashKey(attributeName = "speechiness")
+    @DynamoDBAttribute(attributeName = "speechiness")
     public float getSpeechiness() {
         return speechiness;
     }
@@ -131,7 +130,7 @@ public class Song {
         this.speechiness = speechiness;
     }
 
-    @DynamoDBHashKey(attributeName = "valence")
+    @DynamoDBAttribute(attributeName = "valence")
     public float getValence() {
         return valence;
     }
@@ -140,7 +139,7 @@ public class Song {
         this.valence = valence;
     }
 
-    @DynamoDBHashKey(attributeName = "tempo")
+    @DynamoDBAttribute(attributeName = "tempo")
     public float getTempo() {
         return tempo;
     }
@@ -149,21 +148,20 @@ public class Song {
         this.tempo = tempo;
     }
 
+    @DynamoDBAttribute(attributeName = "hidden")
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    public void setHidden(boolean hidden) {
+        this.hidden = hidden;
+    }
+
     @DynamoDBIgnore
+    @Override
     public String toString() {
         return "Song{artist='" + artist
                 + "', song='" + song
-                + "', releaseDate='" + releaseDate
-                + "', uri='" + uri
-                + "', link='" + link
-                + "', acousticness=" + acousticness
-                + ", danceability=" + danceability
-                + ", energy=" + energy
-                + ", instrumentalness=" + instrumentalness
-                + ", liveness=" + liveness
-                + ", loudness=" + loudness
-                + ", speechiness=" + speechiness
-                + ", valence=" + valence
-                + ", tempo=" + tempo + "}";
+                + "', releaseDate='" + releaseDate + "}";
     }
 }
