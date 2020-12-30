@@ -15,10 +15,7 @@ import com.wrapper.spotify.requests.data.artists.GetArtistsAlbumsRequest;
 import com.wrapper.spotify.requests.data.tracks.GetAudioFeaturesForSeveralTracksRequest;
 import com.wrapper.spotify.requests.data.tracks.GetSeveralTracksRequest;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.hc.core5.http.ParseException;
@@ -77,6 +74,7 @@ public class Spotify {
     public List<String> getAlbumTracks(String artistName, List<String> albumReleases) {
         System.out.println("Loading tracks");
         String name = artistName.toLowerCase();
+        Map<String,String> originalList = new HashMap<>();
         List<String> tracksList = new ArrayList<>();
         try {
             for(String albumRelease: albumReleases){
@@ -88,13 +86,18 @@ public class Spotify {
                     for(ArtistSimplified artist: artistsSimplified) {
                         if (artist.getName().toLowerCase().equals(name)) {
                             String song = item.getName().toLowerCase();
+                            System.out.println(song);
                             if(!song.contains("remix") || song.contains(artistName)) {
-                                tracksList.add(item.getId());
+                                originalList.put(item.getName(),item.getId());
                                 break;
                             }
                         }
                     }
                 }
+            }
+            // Duplicates removed
+            for (Map.Entry<String, String> entry : originalList.entrySet()) {
+                tracksList.add(entry.getValue());
             }
             System.out.println("Ending tracks");
             return tracksList;
@@ -146,7 +149,7 @@ public class Spotify {
                     y = tracksArray.length;
                 }
                 String[] tempList = Arrays.copyOfRange(tracksArray, x, y);
-                GetSeveralTracksRequest getSeveralTracksRequest = this.spotifyApi.getSeveralTracks(tempList).build();
+                GetSeveralTracksRequest getSeveralTracksRequest = spotifyApi.getSeveralTracks(tempList).build();
                 Track[] tList = getSeveralTracksRequest.execute();
                 trackList.addAll(Arrays.asList(tList));
                 x += 45;

@@ -3,15 +3,11 @@ import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
-import com.amazonaws.services.dynamodbv2.document.DynamoDB;
-import com.amazonaws.services.dynamodbv2.document.Table;
-import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
-import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
-import com.amazonaws.services.dynamodbv2.model.KeyType;
-import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
-import com.amazonaws.services.dynamodbv2.model.ResourceInUseException;
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType;
+import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
+import com.amazonaws.services.dynamodbv2.document.*;
+import com.amazonaws.services.dynamodbv2.model.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wrapper.spotify.model_objects.specification.AudioFeatures;
@@ -33,25 +29,49 @@ public class Database {
         this.db = new DynamoDB(client);
     }
 
-    public void createSongTable() {
-        try {
-            System.out.println("Attempting to create table; please wait...");
-            String tableName = "Song";
-            Table table = this.db.createTable(tableName,
-                    Arrays.asList(new KeySchemaElement("artist", KeyType.HASH),
-                            new KeySchemaElement("releaseDate", KeyType.RANGE)),
-                    Arrays.asList(new AttributeDefinition("artist", ScalarAttributeType.S),
-                            new AttributeDefinition("releaseDate", ScalarAttributeType.S)),
-                    new ProvisionedThroughput(10L, 10L));
-            table.waitForActive();
-            System.out.println("Success. Table status: " + table.getDescription().getTableStatus());
-        } catch (ResourceInUseException ex) {
-            System.out.println("Table already exists");
-        } catch (Exception ex) {
-            System.err.println("Unable to create table: ");
-            ex.printStackTrace();
-        }
+    public void createSongTable(){
+        System.out.println("Attempting to create table; please wait...");
+        String tableName = "Song";
 
+        ArrayList<AttributeDefinition> attributeDefinitions = new ArrayList<>();
+        attributeDefinitions.add(new AttributeDefinition().withAttributeName("id").withAttributeType("S"));
+        attributeDefinitions.add(new AttributeDefinition().withAttributeName("releaseDate").withAttributeType("S"));
+        attributeDefinitions.add(new AttributeDefinition().withAttributeName("artist").withAttributeType("S"));
+
+        // Key schema for table
+        ArrayList<KeySchemaElement> tableKeySchema = new ArrayList<>();
+        tableKeySchema.add(new KeySchemaElement().withAttributeName("id").withKeyType(KeyType.HASH)); // Partition key
+        tableKeySchema.add(new KeySchemaElement().withAttributeName("releaseDate").withKeyType(KeyType.RANGE)); // Sort key
+
+        // Initial provisioned throughput settings for the indexes
+        ProvisionedThroughput ptIndex = new ProvisionedThroughput()
+                .withReadCapacityUnits(1L)
+                .withWriteCapacityUnits(1L);
+
+        // ArtistIndex
+        GlobalSecondaryIndex artistIndex = new GlobalSecondaryIndex()
+                .withIndexName("ArtistIndex")
+                .withProvisionedThroughput(ptIndex)
+                .withKeySchema(new KeySchemaElement().withAttributeName("artist").withKeyType(KeyType.HASH)) // Partition
+                .withProjection(new Projection().withProjectionType("KEYS_ONLY"));
+
+        CreateTableRequest createTableRequest = new CreateTableRequest().withTableName(tableName)
+                .withProvisionedThroughput(ptIndex)
+                .withAttributeDefinitions(attributeDefinitions)
+                .withKeySchema(tableKeySchema)
+                .withGlobalSecondaryIndexes(artistIndex);
+
+        System.out.println("Creating table " + tableName + "...");
+        db.createTable(createTableRequest);
+        // Wait for table to become active
+        System.out.println("Waiting for " + tableName + " to become ACTIVE...");
+        try {
+            Table table = db.getTable(tableName);
+            table.waitForActive();
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public void deleteTable(){
@@ -60,7 +80,7 @@ public class Database {
             System.out.println("Attempting to delete table; please wait...");
             table.delete();
             table.waitForDelete();
-            System.out.print("Success.");
+            System.out.println("Success.");
 
         }
         catch (Exception e) {
@@ -114,6 +134,17 @@ public class Database {
         return artists;
     }
 
+    public boolean getSongs(String artist) {
+        final Song gsiKeyObj = new Song();
+        gsiKeyObj.setArtist(artist);
+        final DynamoDBQueryExpression<Song> queryExpression = new DynamoDBQueryExpression<Song>()
+            .withHashKeyValues(gsiKeyObj)
+            .withIndexName("ArtistIndex")
+            .withConsistentRead(false);
+        final PaginatedQueryList<Song> results = mapper.query(Song.class, queryExpression);
+        return results.size() == 0;
+    }
+
     public Song createSong(String artist, String track, String releaseDate, String externalUrl, AudioFeatures audioFeatures) {
         Song song = new Song();
         song.setAcousticness(audioFeatures.getAcousticness());
@@ -124,21 +155,28 @@ public class Database {
         song.setLink(externalUrl);
         song.setLiveness(audioFeatures.getLiveness());
         song.setLoudness(audioFeatures.getLoudness());
-        song.setReleaseDate(releaseDate);
+        song.setReleaseDate(releaseDate + " - " + artist);
         song.setSong(track);
         song.setSpeechiness(audioFeatures.getSpeechiness());
         song.setTempo(audioFeatures.getTempo());
-        song.setUri(audioFeatures.getId());
+        song.setId(audioFeatures.getId());
         song.setValence(audioFeatures.getValence());
         song.setHidden(false);
-        System.out.println(song);
-        System.out.println("-------------");
         return song;
     }
 
     public void saveSong(List<Song> songs) {
+        System.out.println("saving songs...........");
         mapper.batchSave(songs);
+        System.out.println("SONGS ARE SAVED");
     }
+
+    public void saveSong(Song song){
+        mapper.save(song);
+    }
+
+
+
 
 
 

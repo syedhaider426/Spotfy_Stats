@@ -6,7 +6,7 @@ public class Song {
     private String artist;
     private String song;
     private String releaseDate;
-    private String uri;
+    private String id;
     private String link;
     private float acousticness;
     private float danceability;
@@ -22,11 +22,31 @@ public class Song {
     public Song() {
     }
 
-    @DynamoDBHashKey(attributeName = "artist")
+    public Song(String id){
+        this.id = id;
+    }
+
+    @DynamoDBHashKey(attributeName = "id")
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    @DynamoDBRangeKey(attributeName = "releaseDate")
+    public String getReleaseDate() {
+        return releaseDate;
+    }
+    public void setReleaseDate(String releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
+    @DynamoDBIndexHashKey(attributeName ="artist", globalSecondaryIndexName = "ArtistIndex")
     public String getArtist() {
         return artist;
     }
-
     public void setArtist(String artist) {
         this.artist = artist;
     }
@@ -40,23 +60,6 @@ public class Song {
         this.song = song;
     }
 
-    @DynamoDBRangeKey(attributeName = "releaseDate")
-    public String getReleaseDate() {
-        return releaseDate;
-    }
-
-    public void setReleaseDate(String releaseDate) {
-        this.releaseDate = releaseDate;
-    }
-
-    @DynamoDBAttribute(attributeName = "uri")
-    public String getUri() {
-        return uri;
-    }
-
-    public void setUri(String uri) {
-        this.uri = uri;
-    }
 
     @DynamoDBAttribute(attributeName = "link")
     public String getLink() {
@@ -157,7 +160,6 @@ public class Song {
         this.hidden = hidden;
     }
 
-    @DynamoDBIgnore
     @Override
     public String toString() {
         return "Song{artist='" + artist
