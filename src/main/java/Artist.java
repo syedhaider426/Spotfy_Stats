@@ -1,6 +1,5 @@
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIgnore;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
 @DynamoDBTable(tableName = "Artist")
@@ -33,7 +32,6 @@ public class Artist {
         this.spotifyId = spotifyId;
     }
 
-    @DynamoDBIgnore
     @Override
     public String toString() {
         return "Artist{" +

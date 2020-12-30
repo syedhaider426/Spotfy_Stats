@@ -22,17 +22,12 @@ public class Song {
     public Song() {
     }
 
-    public Song(String id){
-        this.id = id;
+    @DynamoDBHashKey(attributeName = "artist")
+    public String getArtist() {
+        return artist;
     }
-
-    @DynamoDBHashKey(attributeName = "id")
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+    public void setArtist(String artist) {
+        this.artist = artist;
     }
 
     @DynamoDBRangeKey(attributeName = "releaseDate")
@@ -43,12 +38,13 @@ public class Song {
         this.releaseDate = releaseDate;
     }
 
-    @DynamoDBIndexHashKey(attributeName ="artist", globalSecondaryIndexName = "ArtistIndex")
-    public String getArtist() {
-        return artist;
+    @DynamoDBAttribute(attributeName = "spotifyId")
+    public String getId() {
+        return id;
     }
-    public void setArtist(String artist) {
-        this.artist = artist;
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     @DynamoDBAttribute(attributeName = "song")

@@ -16,10 +16,10 @@ public class Main {
         Map<String, String> artists = new HashMap<>();
         for (Map.Entry<String, String> artist : artistsMap.entrySet()) {
             boolean result = db.getSongs(artist.getKey());
-            if (result) {
+            if (result)
                 artists.put(artist.getKey(), artist.getValue());
-            }
         }
+        System.out.println("Size of artists: " + artists.size());
         for (Map.Entry<String, String> artist : artists.entrySet()) {
             String artistName = artist.getKey();
             String spotifyId = artist.getValue();
@@ -58,8 +58,10 @@ public class Main {
                 songs.add(newSong);
                 x++;
             }
-            db.saveSong(songs);
+                db.saveSong(songs);
         }
+        if(artists.size() == 0)
+            System.out.println("No more songs to save");
 
     }
 }

@@ -34,13 +34,12 @@ public class Database {
         String tableName = "Song";
 
         ArrayList<AttributeDefinition> attributeDefinitions = new ArrayList<>();
-        attributeDefinitions.add(new AttributeDefinition().withAttributeName("id").withAttributeType("S"));
         attributeDefinitions.add(new AttributeDefinition().withAttributeName("releaseDate").withAttributeType("S"));
         attributeDefinitions.add(new AttributeDefinition().withAttributeName("artist").withAttributeType("S"));
 
         // Key schema for table
         ArrayList<KeySchemaElement> tableKeySchema = new ArrayList<>();
-        tableKeySchema.add(new KeySchemaElement().withAttributeName("id").withKeyType(KeyType.HASH)); // Partition key
+        tableKeySchema.add(new KeySchemaElement().withAttributeName("artist").withKeyType(KeyType.HASH)); // Partition key
         tableKeySchema.add(new KeySchemaElement().withAttributeName("releaseDate").withKeyType(KeyType.RANGE)); // Sort key
 
         // Initial provisioned throughput settings for the indexes
@@ -48,18 +47,10 @@ public class Database {
                 .withReadCapacityUnits(1L)
                 .withWriteCapacityUnits(1L);
 
-        // ArtistIndex
-        GlobalSecondaryIndex artistIndex = new GlobalSecondaryIndex()
-                .withIndexName("ArtistIndex")
-                .withProvisionedThroughput(ptIndex)
-                .withKeySchema(new KeySchemaElement().withAttributeName("artist").withKeyType(KeyType.HASH)) // Partition
-                .withProjection(new Projection().withProjectionType("KEYS_ONLY"));
-
         CreateTableRequest createTableRequest = new CreateTableRequest().withTableName(tableName)
                 .withProvisionedThroughput(ptIndex)
                 .withAttributeDefinitions(attributeDefinitions)
-                .withKeySchema(tableKeySchema)
-                .withGlobalSecondaryIndexes(artistIndex);
+                .withKeySchema(tableKeySchema);
 
         System.out.println("Creating table " + tableName + "...");
         db.createTable(createTableRequest);
@@ -87,6 +78,19 @@ public class Database {
             System.err.println("Unable to delete table: ");
             System.err.println(e.getMessage());
         }
+    }
+
+    public void deleteArtist(String artist){
+        Artist a = new Artist();
+        a.setArtist(artist);
+        mapper.delete(a);
+    }
+
+    public void createArtist(String artist, String newArtistName, String spotifyId){
+        deleteArtist(artist);
+        Artist b = new Artist(newArtistName,spotifyId);
+        b.setArtist(newArtistName);
+        mapper.save(b);
     }
 
     public void createArtistTable() {
@@ -135,12 +139,10 @@ public class Database {
     }
 
     public boolean getSongs(String artist) {
-        final Song gsiKeyObj = new Song();
-        gsiKeyObj.setArtist(artist);
+        final Song song = new Song();
+        song.setArtist(artist);
         final DynamoDBQueryExpression<Song> queryExpression = new DynamoDBQueryExpression<Song>()
-            .withHashKeyValues(gsiKeyObj)
-            .withIndexName("ArtistIndex")
-            .withConsistentRead(false);
+            .withHashKeyValues(song);
         final PaginatedQueryList<Song> results = mapper.query(Song.class, queryExpression);
         return results.size() == 0;
     }
@@ -155,7 +157,7 @@ public class Database {
         song.setLink(externalUrl);
         song.setLiveness(audioFeatures.getLiveness());
         song.setLoudness(audioFeatures.getLoudness());
-        song.setReleaseDate(releaseDate + " - " + artist);
+        song.setReleaseDate(releaseDate + " -- " + artist + " -- " + audioFeatures.getId());
         song.setSong(track);
         song.setSpeechiness(audioFeatures.getSpeechiness());
         song.setTempo(audioFeatures.getTempo());
@@ -174,6 +176,13 @@ public class Database {
     public void saveSong(Song song){
         mapper.save(song);
     }
+
+    public int getTotalSongs() {
+        DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
+        List<Song> scanResult = mapper.scan(Song.class,scanExpression);
+        return scanResult.size();
+    }
+
 
 
 
