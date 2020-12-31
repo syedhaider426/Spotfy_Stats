@@ -5,7 +5,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
 import com.wrapper.spotify.model_objects.specification.AudioFeatures;
-import stats.Database;
+import stats.config.DynamoDBConfiguration;
 import stats.models.Song;
 import stats.repository.SongRepository;
 
@@ -16,7 +16,7 @@ public class SongService implements SongRepository {
     private final DynamoDBMapper mapper;
 
     public SongService(){
-        mapper = new Database().getMapper();
+        mapper = new DynamoDBConfiguration().getMapper();
     }
 
     public boolean getSongsForArtist(String artist) {

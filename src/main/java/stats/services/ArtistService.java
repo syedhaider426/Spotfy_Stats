@@ -2,7 +2,7 @@ package stats.services;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
-import stats.Database;
+import stats.config.DynamoDBConfiguration;
 import stats.models.Artist;
 import stats.repository.ArtistRepository;
 
@@ -15,7 +15,7 @@ public class ArtistService implements ArtistRepository {
     private DynamoDBMapper mapper;
 
     public ArtistService(){
-        mapper = new Database().getMapper();
+        mapper = new DynamoDBConfiguration().getMapper();
     }
 
     public Map<String,String> getAllArtists(){

@@ -1,4 +1,4 @@
-package stats;
+package stats.config;
 
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -8,49 +8,40 @@ import com.amazonaws.services.dynamodbv2.document.*;
 import com.amazonaws.services.dynamodbv2.model.*;
 import com.wrapper.spotify.model_objects.specification.AudioFeatures;
 import com.wrapper.spotify.model_objects.specification.Track;
-import org.springframework.beans.factory.annotation.Autowired;
 import stats.models.Song;
 import stats.services.ArtistService;
 import stats.services.SongService;
+import stats.services.SpotifyService;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Database {
-    private DynamoDB db;
-    private DynamoDBMapper mapper;
-    private AmazonDynamoDB client;
-    private Spotify spotify;
+public class DynamoDBConfiguration {
+    private final DynamoDB db;
+    private final DynamoDBMapper mapper;
+    private final AmazonDynamoDB client;
+    private final SpotifyService spotify;
 
-    public Database(){
+    public DynamoDBConfiguration(){
         client = AmazonDynamoDBClientBuilder
                 .standard()
                 .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration("http://localhost:8000", "us-west-2"))
                 .build();
         this.mapper = new DynamoDBMapper(client);
         this.db = new DynamoDB(client);
-        spotify = new Spotify();
+        spotify = new SpotifyService();
     }
 
     public DynamoDB getDb() {
         return db;
     }
-    public void setDb(DynamoDB db) {
-        this.db = db;
-    }
-
     public DynamoDBMapper getMapper() {
         return mapper;
     }
-    public void setMapper(DynamoDBMapper mapper) {
-        this.mapper = mapper;
-    }
-
     public AmazonDynamoDB getClient() {
         return client;
     }
-    public void setClient(AmazonDynamoDB client) {
-        this.client = client;
-    }
+
 
     public void createSongTable(){
         System.out.println("Attempting to create table; please wait...");
@@ -109,9 +100,6 @@ public class Database {
     }
 
     public void loadData() {
-        System.out.println(spotify);
-        if(true)
-            return;
         ArtistService artistService = new ArtistService();
         SongService songService = new SongService();
         Map<String, String> artistsMap = artistService.getAllArtists();
@@ -140,10 +128,10 @@ public class Database {
                 System.out.println("No audio features found");
                 break;
             }
-            List<String> trackList = audioFeatureList
-                    .stream()
-                    .map(track -> track.getId())
-                    .collect(Collectors.toList());
+            List<String> trackList = new ArrayList<>();
+            for (AudioFeatures track : audioFeatureList) {
+                trackList.add(track.getId());
+            }
             List<Track> songInfoList = spotify.getSongInfo(trackList);  //batch
             if (songInfoList.size() == 0) {
                 System.out.println("No song information found");

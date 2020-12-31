@@ -1,4 +1,4 @@
-package stats;
+package stats.services;
 
 import com.neovisionaries.i18n.CountryCode;
 import com.wrapper.spotify.SpotifyApi;
@@ -22,10 +22,10 @@ import java.util.stream.Collectors;
 import org.apache.hc.core5.http.ParseException;
 import stats.config.GetPropertyValues;
 
-public class Spotify {
+public class SpotifyService {
     private SpotifyApi spotifyApi;
 
-    public Spotify() {
+    public SpotifyService() {
         try {
             GetPropertyValues properties = new GetPropertyValues();
             Properties prop = properties.getPropValues();
