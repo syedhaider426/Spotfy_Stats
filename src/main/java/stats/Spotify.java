@@ -1,3 +1,4 @@
+package stats;
 
 import com.neovisionaries.i18n.CountryCode;
 import com.wrapper.spotify.SpotifyApi;
@@ -19,6 +20,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import org.apache.hc.core5.http.ParseException;
+import stats.config.GetPropertyValues;
 
 public class Spotify {
     private SpotifyApi spotifyApi;
@@ -173,4 +175,5 @@ public class Spotify {
 
         return this.spotifyApi;
     }
+
 }

@@ -1,3 +1,4 @@
+package stats.models;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.*;
 
