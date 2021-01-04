@@ -4,14 +4,17 @@ import com.neovisionaries.i18n.CountryCode;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
 import com.wrapper.spotify.model_objects.credentials.ClientCredentials;
+import com.wrapper.spotify.model_objects.special.SearchResult;
 import com.wrapper.spotify.model_objects.specification.*;
 import com.wrapper.spotify.requests.authorization.client_credentials.ClientCredentialsRequest;
 import com.wrapper.spotify.requests.data.albums.GetAlbumsTracksRequest;
 import com.wrapper.spotify.requests.data.artists.GetArtistsAlbumsRequest;
+import com.wrapper.spotify.requests.data.search.SearchItemRequest;
 import com.wrapper.spotify.requests.data.tracks.GetAudioFeaturesForSeveralTracksRequest;
 import com.wrapper.spotify.requests.data.tracks.GetSeveralTracksRequest;
 import org.apache.hc.core5.http.ParseException;
 import stats.config.GetPropertyValues;
+import com.amazonaws.services.lambda.runtime.Context;
 
 import java.io.IOException;
 import java.util.*;
@@ -32,6 +35,22 @@ public class SpotifyService {
             ex.printStackTrace();
         }
 
+    }
+
+    public String searchForArtist(String artist, Context context){
+        context.getLogger().log("Searching for artist...");
+        SearchItemRequest searchItemRequest = spotifyApi
+                .searchItem(artist,"artist")
+                .build();
+        try{
+             SearchResult searchResult = searchItemRequest.execute();
+             Paging<Artist> pagingArtists = searchResult.getArtists();
+             Artist[] artists = pagingArtists.getItems();
+             return artists[0].getId();
+        } catch (ParseException | SpotifyWebApiException | IOException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 
     public List<String> getReleases(String artistId) {

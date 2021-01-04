@@ -2,6 +2,7 @@ package stats.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
@@ -29,17 +30,15 @@ public class DynamoDBConfiguration {
         try {
             GetPropertyValues properties = new GetPropertyValues();
             Properties prop = properties.getPropValues();
-//        client = AmazonDynamoDBClientBuilder
-//                .standard()
-//                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration("http://localhost:8000", "us-west-2"))
-//                .build();
-            System.out.println(prop.getProperty("accessKey"));
-            client = AmazonDynamoDBClientBuilder
-                    .standard()
-                    .withRegion("us-west-2")
-                    .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(prop.getProperty("accessKey"), prop.getProperty("secretKey"))))
-                    .build();
-            System.out.println(client);
+        client = AmazonDynamoDBClientBuilder
+                .standard()
+                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration("http://localhost:8000", "us-west-2"))
+                .build();
+//            client = AmazonDynamoDBClientBuilder
+//                    .standard()
+//                    .withRegion("us-west-2")
+//                    .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(prop.getProperty("accessKey"), prop.getProperty("secretKey"))))
+//                    .build();
             this.mapper = new DynamoDBMapper(client);
             this.db = new DynamoDB(client);
             spotify = new SpotifyService();
@@ -134,11 +133,12 @@ public class DynamoDBConfiguration {
             }
     }
 
-    public void loadData() {
+    public String loadData() {
         ArtistService artistService = new ArtistService();
         SongService songService = new SongService();
         Map<String, String> artistsMap = artistService.getAllArtists();
         Map<String, String> artists = new HashMap<>();
+        int songCounter = 0;
         for (Map.Entry<String, String> artist : artistsMap.entrySet()) {
             boolean result = songService.isArtistHasSongs(artist.getKey());
             if (result)
@@ -182,10 +182,12 @@ public class DynamoDBConfiguration {
                 songs.add(newSong);
                 x++;
             }
+            songCounter += songs.size();
             songService.save(songs);
         }
         if(artists.size() == 0)
             System.out.println("No more songs to save");
+        return "Artists - " + artists.size() + "; Songs - " + songCounter;
     }
 
 
