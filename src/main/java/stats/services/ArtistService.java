@@ -6,9 +6,7 @@ import stats.config.DynamoDBConfiguration;
 import stats.models.Artist;
 import stats.repository.ArtistRepository;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ArtistService implements ArtistRepository {
 
@@ -18,6 +16,7 @@ public class ArtistService implements ArtistRepository {
         mapper = new DynamoDBConfiguration().getMapper();
     }
 
+    // Used to load in data
     public Map<String,String> getAllArtists(){
         Map<String,String> artists = new HashMap<>();
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
@@ -28,6 +27,18 @@ public class ArtistService implements ArtistRepository {
         return artists;
     }
 
+    // Used to populate autocomplete
+    public List<String> getArtists(){
+        DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
+        List<Artist> scanResult = mapper.scan(Artist.class,scanExpression);
+        List<String> artists = new ArrayList<>();
+        for(Artist artist: scanResult){
+            artists.add(artist.getArtist());
+        }
+        Collections.sort(artists);
+        return artists;
+    }
+
     public void create(String name, String spotifyId){
         Artist artist = new Artist(name,spotifyId);
         mapper.save(artist);
@@ -35,6 +46,10 @@ public class ArtistService implements ArtistRepository {
 
     public void create(Artist artist){
         mapper.save(artist);
+    }
+
+    public void create(List<Artist> artist){
+        mapper.batchSave(artist);
     }
 
     public void update(String name, String spotifyId){

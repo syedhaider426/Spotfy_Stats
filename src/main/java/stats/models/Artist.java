@@ -4,15 +4,18 @@ package stats.models;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@JsonIgnoreProperties(ignoreUnknown=true)
 @DynamoDBTable(tableName = "Artist")
 public class Artist {
 
     private String artist;
     private String spotifyId;
+
     public Artist() {}
 
-    public Artist(String artist,String spotifyId){
+    public Artist(String artist, String spotifyId){
         this.artist = artist;
         this.spotifyId = spotifyId;
     }

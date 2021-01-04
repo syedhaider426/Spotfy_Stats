@@ -1,35 +1,56 @@
 package stats.config;
 
-import com.amazonaws.client.builder.AwsClientBuilder;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
-import com.amazonaws.services.dynamodbv2.document.*;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.*;
 import com.wrapper.spotify.model_objects.specification.AudioFeatures;
 import com.wrapper.spotify.model_objects.specification.Track;
+import stats.models.Artist;
 import stats.models.Song;
 import stats.services.ArtistService;
 import stats.services.SongService;
 import stats.services.SpotifyService;
 
+import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class DynamoDBConfiguration {
-    private final DynamoDB db;
-    private final DynamoDBMapper mapper;
-    private final AmazonDynamoDB client;
-    private final SpotifyService spotify;
+    private DynamoDB db;
+    private DynamoDBMapper mapper;
+    private AmazonDynamoDB client;
+    private SpotifyService spotify;
 
     public DynamoDBConfiguration(){
-        client = AmazonDynamoDBClientBuilder
-                .standard()
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration("http://localhost:8000", "us-west-2"))
-                .build();
-        this.mapper = new DynamoDBMapper(client);
-        this.db = new DynamoDB(client);
-        spotify = new SpotifyService();
+        try {
+            GetPropertyValues properties = new GetPropertyValues();
+            Properties prop = properties.getPropValues();
+//        client = AmazonDynamoDBClientBuilder
+//                .standard()
+//                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration("http://localhost:8000", "us-west-2"))
+//                .build();
+            System.out.println(prop.getProperty("accessKey"));
+            client = AmazonDynamoDBClientBuilder
+                    .standard()
+                    .withRegion("us-west-2")
+                    .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(prop.getProperty("accessKey"), prop.getProperty("secretKey"))))
+                    .build();
+            System.out.println(client);
+            this.mapper = new DynamoDBMapper(client);
+            this.db = new DynamoDB(client);
+            spotify = new SpotifyService();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void listTables(){
+        System.out.println(mapper.load(Artist.class,"Crizzly").getArtist());
     }
 
     public DynamoDB getDb() {
@@ -80,23 +101,37 @@ public class DynamoDBConfiguration {
     }
 
     public void createArtistTable() {
-        try {
             System.out.println("Attempting to create table; please wait...");
             String tableName = "Artist";
-            Table table = db.createTable(tableName,
-                    Collections.singletonList(new KeySchemaElement("artist", KeyType.HASH)),
-                    Collections.singletonList(new AttributeDefinition("artist", ScalarAttributeType.S)),
-                    new ProvisionedThroughput(10L, 10L));
-            table.waitForActive();
-            System.out.println("Success.  Table status: " + table.getDescription().getTableStatus());
-        } catch (ResourceInUseException ex) {
-            System.out.println("Table already exists");
-            ex.printStackTrace();
-        } catch (Exception ex) {
-            System.err.println("Unable to create table: ");
-            ex.printStackTrace();
-        }
 
+            ArrayList<AttributeDefinition> attributeDefinitions = new ArrayList<>();
+            attributeDefinitions.add(new AttributeDefinition().withAttributeName("artist").withAttributeType("S"));
+
+            // Key schema for table
+            ArrayList<KeySchemaElement> tableKeySchema = new ArrayList<>();
+            tableKeySchema.add(new KeySchemaElement().withAttributeName("artist").withKeyType(KeyType.HASH)); // Partition key
+
+            // Initial provisioned throughput settings for the indexes
+            ProvisionedThroughput ptIndex = new ProvisionedThroughput()
+                    .withReadCapacityUnits(1L)
+                    .withWriteCapacityUnits(1L);
+
+            CreateTableRequest createTableRequest = new CreateTableRequest().withTableName(tableName)
+                    .withProvisionedThroughput(ptIndex)
+                    .withAttributeDefinitions(attributeDefinitions)
+                    .withStreamSpecification(new StreamSpecification().withStreamEnabled(true).withStreamViewType("KEYS_ONLY"))
+                    .withKeySchema(tableKeySchema);
+
+            db.createTable(createTableRequest);
+            // Wait for table to become active
+            System.out.println("Waiting for " + tableName + " to become ACTIVE...");
+            try {
+                Table table = db.getTable(tableName);
+                table.waitForActive();
+            }
+            catch (InterruptedException e) {
+                e.printStackTrace();
+            }
     }
 
     public void loadData() {
@@ -105,7 +140,7 @@ public class DynamoDBConfiguration {
         Map<String, String> artistsMap = artistService.getAllArtists();
         Map<String, String> artists = new HashMap<>();
         for (Map.Entry<String, String> artist : artistsMap.entrySet()) {
-            boolean result = songService.getSongsForArtist(artist.getKey());
+            boolean result = songService.isArtistHasSongs(artist.getKey());
             if (result)
                 artists.put(artist.getKey(), artist.getValue());
         }
@@ -153,6 +188,27 @@ public class DynamoDBConfiguration {
             System.out.println("No more songs to save");
     }
 
+
+    public void deleteTable(String t){
+        Table table = db.getTable(t);
+        try {
+            System.out.println("Attempting to delete table; please wait...");
+            table.delete();
+            table.waitForDelete();
+            System.out.print("Success.");
+        }
+        catch (Exception e) {
+            System.err.println("Unable to delete table: ");
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public void populateArtists(String[][] artists){
+        ArtistService a = new ArtistService();
+        for(int x = 0; x < artists.length; x++){
+            a.create(artists[x][0],artists[x][1]);
+        }
+    }
 
 
 

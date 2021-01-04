@@ -7,7 +7,8 @@ import java.util.List;
 
 public interface SongRepository {
 
-    boolean getSongsForArtist(String artist);
+
+    boolean isArtistHasSongs(String artist);
 
     Song create(String artist, String track, String releaseDate, String externalUrl, AudioFeatures audioFeatures);
 
