@@ -14,10 +14,6 @@ public class ArtistController {
 
     private ArtistService artistService;
 
-    public ArtistController(){
-        artistService = new ArtistService();
-    }
-
     @RequestMapping(value = "/allArtists", method = RequestMethod.GET)
     public List<String> getArtists(){
         List<String> artists = artistService.getArtists();

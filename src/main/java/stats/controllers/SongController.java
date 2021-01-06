@@ -11,11 +11,6 @@ public class SongController {
 
     private SongService songService;
 
-    public SongController(){
-        songService = new SongService();
-    }
-
-
     @RequestMapping(value = "/info", method = RequestMethod.GET)
     public PaginatedQueryList<Song> getSongs(@RequestParam("artist") String artist){
         PaginatedQueryList<Song> results = songService.getSongsForArtist(artist);

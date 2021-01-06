@@ -59,7 +59,4 @@ target/
 /.nb-gradle/
 .idea/compiler.xml
 .idea/misc.xml
-target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst
-target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
-target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst
-target/Spotfy_Stats-1.0-SNAPSHOT.jar.original
+

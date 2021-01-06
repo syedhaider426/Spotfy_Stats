@@ -79,27 +79,20 @@ public class SongService implements SongRepository {
         System.out.println(scanResult.size());
         for(Song s: scanResult){
             String date = s.getReleaseDate().substring(0,s.getReleaseDate().indexOf("--")-1);
-            if(s.getArtist().equals("Chime")){
-                System.out.println("Found chime");
-                System.out.println(Integer.parseInt(date.substring(0,4)));
-            }
             if(Integer.parseInt(date.substring(0,4)) <= 2000){
-                System.out.println("HIDING song");
                 s.setHidden(true);
                 mapper.save(s);
             }
-
         }
-        System.out.print("FINISHED");
-    }
-
-    public void showHiddenSongs(){
-        DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
-        List<Song> scanResult = mapper.scan(Song.class,scanExpression);
-        for (Song book : scanResult) {
-            if(book.isHidden())
-                mapper.delete(book);
+        DynamoDBScanExpression scanExpression2 = new DynamoDBScanExpression();
+        List<Song> scanResult2 = mapper.scan(Song.class,scanExpression2);
+        for (Song song : scanResult2) {
+            if(song.isHidden())
+                mapper.delete(song);
         }
     }
+
+
+
 
 }

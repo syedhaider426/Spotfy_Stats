@@ -48,7 +48,6 @@ public class Song {
     public String getId() {
         return id;
     }
-
     public void setId(String id) {
         this.id = id;
     }
@@ -57,7 +56,6 @@ public class Song {
     public String getSong() {
         return song;
     }
-
     public void setSong(String song) {
         this.song = song;
     }
@@ -67,7 +65,6 @@ public class Song {
     public String getLink() {
         return this.link;
     }
-
     public void setLink(String link) {
         this.link = link;
     }
@@ -76,7 +73,6 @@ public class Song {
     public float getAcousticness() {
         return acousticness;
     }
-
     public void setAcousticness(float acousticness) {
         this.acousticness = acousticness;
     }
@@ -85,7 +81,6 @@ public class Song {
     public float getDanceability() {
         return danceability;
     }
-
     public void setDanceability(float danceability) {
         this.danceability = danceability;
     }
@@ -94,7 +89,6 @@ public class Song {
     public float getEnergy() {
         return energy;
     }
-
     public void setEnergy(float energy) {
         this.energy = energy;
     }
@@ -103,7 +97,6 @@ public class Song {
     public float getInstrumentalness() {
         return instrumentalness;
     }
-
     public void setInstrumentalness(float instrumentalness) {
         this.instrumentalness = instrumentalness;
     }
@@ -112,7 +105,6 @@ public class Song {
     public float getLiveness() {
         return liveness;
     }
-
     public void setLiveness(float liveness) {
         this.liveness = liveness;
     }
@@ -121,7 +113,6 @@ public class Song {
     public float getLoudness() {
         return loudness;
     }
-
     public void setLoudness(float loudness) {
         this.loudness = loudness;
     }
@@ -130,7 +121,6 @@ public class Song {
     public float getSpeechiness() {
         return speechiness;
     }
-
     public void setSpeechiness(float speechiness) {
         this.speechiness = speechiness;
     }
@@ -139,7 +129,6 @@ public class Song {
     public float getValence() {
         return valence;
     }
-
     public void setValence(float valence) {
         this.valence = valence;
     }
@@ -148,7 +137,6 @@ public class Song {
     public float getTempo() {
         return tempo;
     }
-
     public void setTempo(float tempo) {
         this.tempo = tempo;
     }
@@ -157,7 +145,6 @@ public class Song {
     public boolean isHidden() {
         return hidden;
     }
-
     public void setHidden(boolean hidden) {
         this.hidden = hidden;
     }
@@ -169,4 +156,7 @@ public class Song {
                 + "', hidden='" + hidden
                 + "', releaseDate='" + releaseDate + "}";
     }
+
+
+
 }

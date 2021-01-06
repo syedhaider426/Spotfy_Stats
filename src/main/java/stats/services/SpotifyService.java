@@ -1,5 +1,6 @@
 package stats.services;
 
+import com.amazonaws.services.lambda.runtime.Context;
 import com.neovisionaries.i18n.CountryCode;
 import com.wrapper.spotify.SpotifyApi;
 import com.wrapper.spotify.exceptions.SpotifyWebApiException;
@@ -14,7 +15,6 @@ import com.wrapper.spotify.requests.data.tracks.GetAudioFeaturesForSeveralTracks
 import com.wrapper.spotify.requests.data.tracks.GetSeveralTracksRequest;
 import org.apache.hc.core5.http.ParseException;
 import stats.config.GetPropertyValues;
-import com.amazonaws.services.lambda.runtime.Context;
 
 import java.io.IOException;
 import java.util.*;
@@ -155,6 +155,7 @@ public class SpotifyService {
 
     public List<Track> getSongInfo(List<String> tracks) {
         System.out.println("Loading track information");
+        this.spotifyApi = this.setToken();
         String[] tracksArray = tracks.toArray(new String[0]);
         List<Track> trackList = new ArrayList<>();
         int x = 0;
