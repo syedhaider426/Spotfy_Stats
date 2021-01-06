@@ -1,9 +1,11 @@
 package stats.repository;
+import org.socialsignin.spring.data.dynamodb.repository.EnableScan;
 import stats.models.Artist;
 
 import java.util.List;
 import java.util.Map;
 
+@EnableScan
 public interface ArtistRepository {
     Map<String,String> getAllArtists();
 

@@ -37,6 +37,10 @@ public class SpotifyService {
 
     }
 
+    public SpotifyApi getSpotifyApi() {
+        return spotifyApi;
+    }
+
     public String searchForArtist(String artist, Context context){
         context.getLogger().log("Searching for artist...");
         SearchItemRequest searchItemRequest = spotifyApi
