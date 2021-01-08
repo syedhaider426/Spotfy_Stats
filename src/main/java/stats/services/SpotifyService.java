@@ -14,13 +14,18 @@ import com.wrapper.spotify.requests.data.search.SearchItemRequest;
 import com.wrapper.spotify.requests.data.tracks.GetAudioFeaturesForSeveralTracksRequest;
 import com.wrapper.spotify.requests.data.tracks.GetSeveralTracksRequest;
 import org.apache.hc.core5.http.ParseException;
+import org.springframework.stereotype.Service;
 import stats.config.GetPropertyValues;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+@Service
 public class SpotifyService {
+
+
     private SpotifyApi spotifyApi;
 
     public SpotifyService() {
@@ -51,6 +56,27 @@ public class SpotifyService {
              Paging<Artist> pagingArtists = searchResult.getArtists();
              Artist[] artists = pagingArtists.getItems();
              return artists[0].getId();
+        } catch (ParseException | SpotifyWebApiException | IOException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    public String searchForArtist(String artist){
+        this.spotifyApi = setToken();
+        System.out.println("Did I make it here");
+        SearchItemRequest searchItemRequest = spotifyApi
+                .searchItem(artist,"artist")
+                .build();
+        try{
+            SearchResult searchResult = searchItemRequest.execute();
+            Paging<Artist> pagingArtists = searchResult.getArtists();
+            Artist[] artists = pagingArtists.getItems();
+            if(artists.length == 0){
+                System.out.println("No artists found with name: " + artist);
+                return "";
+            }
+            return artists[0].getId();
         } catch (ParseException | SpotifyWebApiException | IOException e) {
             e.printStackTrace();
         }

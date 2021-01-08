@@ -1,16 +1,23 @@
 package stats.services;
 
+import com.amazonaws.Response;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import stats.config.DynamoDBConfiguration;
+import stats.exceptions.*;
 import stats.models.Artist;
 import stats.repository.ArtistRepository;
-
+import java.net.URI;
 import java.util.*;
 
+@Service
 public class ArtistService implements ArtistRepository {
 
     private DynamoDBMapper mapper;
+
 
     public ArtistService(){
         mapper = new DynamoDBConfiguration().getMapper();
@@ -32,6 +39,8 @@ public class ArtistService implements ArtistRepository {
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
         List<Artist> scanResult = mapper.scan(Artist.class,scanExpression);
         List<String> artists = new ArrayList<>();
+        if(artists.size() == 0)
+            throw new ServerException("No artists were found. There was an error with the server.");
         for(Artist artist: scanResult){
             artists.add(artist.getArtist());
         }
@@ -39,10 +48,29 @@ public class ArtistService implements ArtistRepository {
         return artists;
     }
 
-    public void create(String name, String spotifyId){
-        Artist artist = new Artist(name,spotifyId);
-        mapper.save(artist);
+
+    public boolean getArtist(String name){
+        Artist artist = mapper.load(Artist.class,name);
+        if(artist == null)
+            return false;
+        return true;
     }
+
+    public void create(String name, String spotifyId){
+        mapper.save(new Artist(name,spotifyId));
+    }
+
+    public void create(String name){
+        boolean result = getArtist(name);
+        if(result) {
+            throw new ConflictException("Artist with name' " + name + "' already exists.");
+        }
+        String spotifyId = new SpotifyService().searchForArtist(name);
+        if(spotifyId.length() == 0)
+            throw new NotFoundException("Artist with name '" + name + "' was not found in the Spotify Api.");
+        mapper.save(new Artist(name,spotifyId));
+    }
+
 
     public void create(Artist artist){
         mapper.save(artist);

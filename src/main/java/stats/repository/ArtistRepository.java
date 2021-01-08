@@ -1,21 +1,23 @@
 package stats.repository;
-import org.socialsignin.spring.data.dynamodb.repository.EnableScan;
-import stats.models.Artist;
 
+import org.springframework.http.ResponseEntity;
+import stats.models.Artist;
 import java.util.List;
 import java.util.Map;
 
-@EnableScan
+
 public interface ArtistRepository {
-    Map<String,String> getAllArtists();
+    Map<String,String> getAllArtists() throws Exception;
 
     List<String> getArtists();
 
-    void create(String name, String spotifyId);
+    void create(String name);
 
     void create(Artist artist);
 
     void create(List<Artist> artists);
+
+    void create(String name, String spotifyId);
 
     void update(String name, String spotifyId);
 

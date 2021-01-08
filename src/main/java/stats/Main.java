@@ -3,12 +3,11 @@ package stats;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import stats.config.DynamoDBConfiguration;
-import stats.services.SongService;
 
 @SpringBootApplication
 public class Main {
     public static void main(String[] args) {
-        DynamoDBConfiguration db = new DynamoDBConfiguration();
-        SpringApplication.run(Main.class,args);
+        new DynamoDBConfiguration();
+        //SpringApplication.run(Main.class,args);
     }
 }

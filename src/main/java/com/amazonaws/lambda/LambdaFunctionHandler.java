@@ -5,9 +5,9 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.DynamodbEvent;
 import com.amazonaws.services.lambda.runtime.events.DynamodbEvent.DynamodbStreamRecord;
 import org.json.JSONObject;
-import stats.config.DynamoDBConfiguration;
 import stats.models.Artist;
 import stats.services.ArtistService;
+import stats.services.DynamoDBService;
 import stats.services.SpotifyService;
 
 public class LambdaFunctionHandler implements RequestHandler<DynamodbEvent, Integer> {
@@ -17,10 +17,10 @@ public class LambdaFunctionHandler implements RequestHandler<DynamodbEvent, Inte
         context.getLogger().log("Received event: " + event);
         JSONObject jo;
         SpotifyService spotify = new SpotifyService();
-        DynamoDBConfiguration db = new DynamoDBConfiguration();
+        DynamoDBService db = new DynamoDBService();
         ArtistService artistService = new ArtistService();
         String spotifyId;
-        String results;
+        String results = "";
         for (DynamodbStreamRecord record : event.getRecords()) {
             context.getLogger().log(record.getEventID());
             context.getLogger().log(record.getEventName());
@@ -36,7 +36,11 @@ public class LambdaFunctionHandler implements RequestHandler<DynamodbEvent, Inte
                 }
                 spotifyId = spotify.searchForArtist(artist,context);
                 artistService.update(artist,spotifyId);
-                results = db.populateSongs();
+                try {
+                    results = db.populateSongs();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 if(results.length() == 0){
                     context.getLogger().log("No songs found for Artist - " + artist);
                 }

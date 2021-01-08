@@ -11,6 +11,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.springframework.stereotype.Service;
 import stats.config.DynamoDBConfiguration;
 import stats.models.Song;
 import stats.repository.DynamoDBRepository;
@@ -19,6 +20,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
+@Service
 public class DynamoDBService implements DynamoDBRepository {
 
     private DynamoDBConfiguration dynamoDBConfiguration;
@@ -31,6 +33,22 @@ public class DynamoDBService implements DynamoDBRepository {
         db = dynamoDBConfiguration.getDb();
         mapper = dynamoDBConfiguration.getMapper();
         spotify = new SpotifyService();
+    }
+
+    public DynamoDBConfiguration getDynamoDBConfiguration() {
+        return dynamoDBConfiguration;
+    }
+
+    public DynamoDB getDb() {
+        return db;
+    }
+
+    public DynamoDBMapper getMapper() {
+        return mapper;
+    }
+
+    public SpotifyService getSpotify() {
+        return spotify;
     }
 
     @Override
@@ -104,7 +122,7 @@ public class DynamoDBService implements DynamoDBRepository {
     }
 
     @Override
-    public String populateSongs() {
+    public String populateSongs() throws Exception {
         ArtistService artistService = new ArtistService();
         SongService songService = new SongService();
         Map<String, String> artistsMap = artistService.getAllArtists();

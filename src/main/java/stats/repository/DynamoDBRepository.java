@@ -6,7 +6,7 @@ public interface DynamoDBRepository {
 
     public void createArtistTable();
 
-    public String populateSongs();
+    public String populateSongs() throws Exception;
 
     public void populateArtists(String[][] artists);
 

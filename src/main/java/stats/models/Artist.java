@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @DynamoDBTable(tableName = "Artist")
 public class Artist {
 
+
     private String artist;
     private String spotifyId;
 

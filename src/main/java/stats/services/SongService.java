@@ -6,12 +6,15 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
 import com.wrapper.spotify.model_objects.specification.AudioFeatures;
+import org.springframework.stereotype.Service;
 import stats.config.DynamoDBConfiguration;
+import stats.exceptions.ServerException;
 import stats.models.Song;
 import stats.repository.SongRepository;
 
 import java.util.List;
 
+@Service
 public class SongService implements SongRepository {
 
     private final DynamoDBMapper mapper;
@@ -26,6 +29,8 @@ public class SongService implements SongRepository {
         final DynamoDBQueryExpression<Song> queryExpression = new DynamoDBQueryExpression<Song>()
                 .withHashKeyValues(song);
         final PaginatedQueryList<Song> results = mapper.query(Song.class, queryExpression);
+        if(results.size() == 0)
+            throw new ServerException("No songs found for " + artist);
         return results;
     }
 
