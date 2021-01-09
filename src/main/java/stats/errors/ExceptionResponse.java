@@ -2,9 +2,16 @@ package stats.errors;
 
 import java.util.Date;
 
+/**
+ * POJO for Exceptions which is the format of the response sent to the client
+ */
 public class ExceptionResponse {
     private Date timestamp;
+
+    //Message represents the user-readable error
     private String message;
+
+    //Details represent the java error
     private String details;
 
     public ExceptionResponse(Date timestamp, String message, String details) {

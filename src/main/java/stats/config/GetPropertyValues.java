@@ -5,30 +5,39 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+/**
+ * Get the secret values stored in properties files
+ */
 public class GetPropertyValues {
     Properties prop;
     InputStream inputStream;
 
-    public GetPropertyValues() {
-    }
-
+    /**
+     * Gets the properties created in 'secrets.properties' file
+     * @return prop: Properties object in which properties from secrets.properties can be used
+     * @throws IOException IOException is thrown if error with opening/reading/closing file occurs
+     */
     public Properties getPropValues() throws IOException {
         try {
             Properties prop = new Properties();
+
+            // file name
             String propFileName = "secrets.properties";
-            this.inputStream = this.getClass().getClassLoader().getResourceAsStream(propFileName);
-            if (this.inputStream == null) {
+
+            // stream to get the file
+            inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
+            if (inputStream != null) {
+                prop.load(inputStream); // load  properties from file into prop object
+            } else {
                 throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
             }
-            prop.load(this.inputStream);
             return prop;
-        } catch (Exception ex) {
-            System.out.println("Exception: " + ex);
+        } catch (Exception e) {
+            System.out.println("Exception: " + e);
         } finally {
-            assert this.inputStream != null;
-            this.inputStream.close();
+            assert inputStream != null;
+            inputStream.close();
         }
-
-        return this.prop;
+        return prop;
     }
 }

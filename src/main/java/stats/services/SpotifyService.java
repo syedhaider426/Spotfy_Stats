@@ -19,7 +19,6 @@ import stats.config.GetPropertyValues;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service

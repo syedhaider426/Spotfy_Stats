@@ -1,16 +1,15 @@
 package stats.services;
 
-import com.amazonaws.Response;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import stats.config.DynamoDBConfiguration;
-import stats.exceptions.*;
+import stats.exceptions.ConflictException;
+import stats.exceptions.NotFoundException;
+import stats.exceptions.ServerException;
 import stats.models.Artist;
 import stats.repository.ArtistRepository;
-import java.net.URI;
+
 import java.util.*;
 
 @Service

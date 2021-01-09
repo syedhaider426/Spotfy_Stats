@@ -6,8 +6,12 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBRangeKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-@JsonIgnoreProperties(ignoreUnknown=true)
-@DynamoDBTable(tableName = "Song")
+/**
+ * Model for Song. All attributes are set via the Spotify resource uri about 'Song Features'.
+ * These attributes are returned from the endpoint and used to populate the db.
+ */
+@JsonIgnoreProperties(ignoreUnknown=true) // When a song object is created, ignore any unknown properties
+@DynamoDBTable(tableName = "Song") // Reference the table - Song
 public class Song {
     private String artist;
     private String song;
@@ -25,8 +29,10 @@ public class Song {
     private float tempo;
     private boolean hidden;
 
+
     public Song() {
     }
+
 
     @DynamoDBHashKey(attributeName = "artist")
     public String getArtist() {

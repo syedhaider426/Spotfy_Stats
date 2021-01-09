@@ -62,3 +62,7 @@ target/
 
 *.html
 *.css
+*.js
+
+package-list
+

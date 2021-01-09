@@ -2,12 +2,14 @@ package stats;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import stats.config.DynamoDBConfiguration;
 
+/**
+ * Entry point for Spring Boot Application. This application can return song stats for a specific artist.
+ * Users can also add an artist to the database.
+ */
 @SpringBootApplication
 public class Main {
     public static void main(String[] args) {
-        new DynamoDBConfiguration();
-        //SpringApplication.run(Main.class,args);
+        SpringApplication.run(Main.class,args);
     }
 }

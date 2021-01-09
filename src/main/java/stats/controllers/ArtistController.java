@@ -1,18 +1,11 @@
 package stats.controllers;
 
-import org.json.JSONObject;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import stats.models.Artist;
 import stats.services.ArtistService;
-import stats.services.SpotifyService;
 
-import java.net.URI;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
