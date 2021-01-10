@@ -16,7 +16,7 @@ public class LambdaFunctionHandler implements RequestHandler<DynamodbEvent, Inte
      * has created. These songs are returned from making a request to Spotify's API.
      * @param event DML (insert,update,delete)
      * @param context (logger)
-     * @return
+     * @return number of records processed
      */
     @Override
     public Integer handleRequest(DynamodbEvent event, Context context) {
