@@ -19,6 +19,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Handles the business logic for database. These methods
+ * are intended to be used locally (populate data/delete date) or for configuration of the database.
+ */
 @Service
 public class DynamoDBService implements DynamoDBRepository {
 
@@ -27,7 +31,7 @@ public class DynamoDBService implements DynamoDBRepository {
     private DynamoDBMapper mapper;
     private SpotifyService spotify;
 
-    public DynamoDBService(){
+    public DynamoDBService() {
         dynamoDBConfiguration = new DynamoDBConfiguration();
         db = dynamoDBConfiguration.getDb();
         mapper = dynamoDBConfiguration.getMapper();
@@ -50,11 +54,12 @@ public class DynamoDBService implements DynamoDBRepository {
         return spotify;
     }
 
-    @Override
+    // Create the Song table
     public void createSongTable() {
         System.out.println("Attempting to create table; please wait...");
         String tableName = "Song";
 
+        // Atrtibute for keys - artist and releaseDate
         ArrayList<AttributeDefinition> attributeDefinitions = new ArrayList<>();
         attributeDefinitions.add(new AttributeDefinition().withAttributeName("releaseDate").withAttributeType("S"));
         attributeDefinitions.add(new AttributeDefinition().withAttributeName("artist").withAttributeType("S"));
@@ -66,9 +71,10 @@ public class DynamoDBService implements DynamoDBRepository {
 
         // Initial provisioned throughput settings for the indexes
         ProvisionedThroughput ptIndex = new ProvisionedThroughput()
-                .withReadCapacityUnits(1L)
-                .withWriteCapacityUnits(1L);
+                .withReadCapacityUnits(5L)
+                .withWriteCapacityUnits(5L);
 
+        // Request to create table
         CreateTableRequest createTableRequest = new CreateTableRequest().withTableName(tableName)
                 .withProvisionedThroughput(ptIndex)
                 .withAttributeDefinitions(attributeDefinitions)
@@ -86,11 +92,12 @@ public class DynamoDBService implements DynamoDBRepository {
         }
     }
 
-    @Override
+    // Create the Artist table
     public void createArtistTable() {
         System.out.println("Attempting to create table; please wait...");
         String tableName = "Artist";
 
+        // Attribute for key
         ArrayList<AttributeDefinition> attributeDefinitions = new ArrayList<>();
         attributeDefinitions.add(new AttributeDefinition().withAttributeName("artist").withAttributeType("S"));
 
@@ -103,6 +110,7 @@ public class DynamoDBService implements DynamoDBRepository {
                 .withReadCapacityUnits(1L)
                 .withWriteCapacityUnits(1L);
 
+        // Request to create table
         CreateTableRequest createTableRequest = new CreateTableRequest().withTableName(tableName)
                 .withProvisionedThroughput(ptIndex)
                 .withAttributeDefinitions(attributeDefinitions)
@@ -120,8 +128,8 @@ public class DynamoDBService implements DynamoDBRepository {
         }
     }
 
-    @Override
-    public String populateSongs() throws Exception {
+    // Method used locally to
+    public void populateSongs() {
         ArtistService artistService = new ArtistService();
         SongService songService = new SongService();
         Map<String, String> artistsMap = artistService.getAllArtists();
@@ -129,7 +137,7 @@ public class DynamoDBService implements DynamoDBRepository {
         int songCounter = 0;
         for (Map.Entry<String, String> artist : artistsMap.entrySet()) {
             boolean result = songService.isArtistHasSongs(artist.getKey());
-            if (result)
+            if (!result)
                 artists.put(artist.getKey(), artist.getValue());
         }
         for (Map.Entry<String, String> artist : artists.entrySet()) {
@@ -174,11 +182,70 @@ public class DynamoDBService implements DynamoDBRepository {
             songService.save(songs);
         }
         if (artists.size() == 0)
-            return "";
-        return "Artists - " + artists.size() + "Songs - " + songCounter;
+            System.out.println("") ;
+        else
+            System.out.println("Artists - " + artists.size() + "Songs - " + songCounter);
     }
 
-    @Override
+    /**
+     * Method used by the Lambda function to get the songs and the song attributes for a specific artist
+     * @param name of artist
+     * @param spotifyId of artist
+     * @return success/failure message
+     */
+    public String populateSongs(String name, String spotifyId) {
+        SongService songService = new SongService();
+
+        // Get albums created by artist - albums can represent a one or more songs
+        List<String> albumReleases = spotify.getReleases(spotifyId);
+        if (albumReleases.size() == 0) {
+            return "No album releases found";
+        }
+
+        // Get tracks for each album
+        List<String> tracks = spotify.getAlbumTracks(name, albumReleases);
+        if (tracks.size() == 0) {
+            return "No tracks found";
+        }
+
+        // Get audio features of each song
+        List<AudioFeatures> audioFeatureList = spotify.getSeveralTrackFeatures(tracks);
+        if (audioFeatureList.size() == 0) {
+            return "No audio features found";
+        }
+        List<String> trackList = new ArrayList<>();
+
+        /**
+         * A new list of tracks is returned from getSeveralTrackFeatures because
+         * some songs do not have audio features
+         **/
+        for (AudioFeatures track : audioFeatureList) {
+            trackList.add(track.getId());
+        }
+
+        // Get song name, releaseDate, and external url (the playable Spotify link)
+        List<Track> songInfoList = spotify.getSongInfo(trackList);  //batch
+        if (songInfoList.size() == 0) {
+            return "No song information found";
+        }
+        int x = 0;
+        List<Song> songs = new ArrayList<>();
+        for (AudioFeatures audioFeature : audioFeatureList) {
+            String songName = songInfoList.get(x).getName();
+            String releaseDate = songInfoList.get(x).getAlbum().getReleaseDate();
+            String externalUrl = songInfoList.get(x).getExternalUrls().get("spotify");
+            Song newSong = songService.create(name, songName, releaseDate, externalUrl, audioFeature);
+            songs.add(newSong);
+            x++;
+        }
+        songService.save(songs);
+        if (songs.size() == 0)
+            return "No songs added";
+        return "Artist and Songs added";
+    }
+
+
+    // Method used locally to load artists in from a 2D-array of artist/spotifyId
     public void populateArtists(String[][] artists) {
         ArtistService a = new ArtistService();
         for (int x = 0; x < artists.length; x++) {
@@ -186,7 +253,7 @@ public class DynamoDBService implements DynamoDBRepository {
         }
     }
 
-    @Override
+    // Method used locally to load songs of an artist in database from a file
     public void populateSongs(String filename) {
         //JSON parser object to parse read file
         JSONParser jsonParser = new JSONParser();
@@ -195,13 +262,16 @@ public class DynamoDBService implements DynamoDBRepository {
         String song, artist, releaseDate, link, spotifyId;
         Set<Song> songs = new HashSet<>();
         try (FileReader reader = new FileReader(filename)) {
-            //Read JSON file
+            //Read JSON file and return JSONObject
             obj = (JSONObject) jsonParser.parse(reader);
+            //Get array of items
             JSONArray jsonArray = (JSONArray) obj.get("Items");
-            System.out.println("Total size: " + jsonArray.size());
             int counter = 1;
             for (Object o : jsonArray) {
+                // Get JSONobject from array
                 jsonobject = (JSONObject) o;
+
+                // Get fields from file
                 song = (String) ((JSONObject) jsonobject.get("song")).get("S");
                 artist = (String) ((JSONObject) jsonobject.get("artist")).get("S");
                 releaseDate = (String) ((JSONObject) jsonobject.get("releaseDate")).get("S");
@@ -218,6 +288,8 @@ public class DynamoDBService implements DynamoDBRepository {
                 danceability = Float.parseFloat((String) ((JSONObject) jsonobject.get("danceability")).get("N"));
                 speechiness = Float.parseFloat((String) ((JSONObject) jsonobject.get("speechiness")).get("N"));
                 energy = Float.parseFloat((String) ((JSONObject) jsonobject.get("energy")).get("N"));
+
+                //Create song
                 Song newSong = new Song();
                 newSong.setAcousticness(acousticness);
                 newSong.setArtist(artist);

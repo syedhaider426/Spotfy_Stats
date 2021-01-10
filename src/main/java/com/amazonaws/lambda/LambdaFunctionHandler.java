@@ -5,46 +5,39 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.DynamodbEvent;
 import com.amazonaws.services.lambda.runtime.events.DynamodbEvent.DynamodbStreamRecord;
 import org.json.JSONObject;
-import stats.models.Artist;
-import stats.services.ArtistService;
 import stats.services.DynamoDBService;
-import stats.services.SpotifyService;
+import stats.services.SongService;
 
 public class LambdaFunctionHandler implements RequestHandler<DynamodbEvent, Integer> {
 
+    /**
+     * Lambda function is triggered upon DynamoDB inserting/updating/deleting a record into the Artist table.
+     * The function will get the artist and populate the Songs table with the songs the artist
+     * has created. These songs are returned from making a request to Spotify's API.
+     * @param event DML (insert,update,delete)
+     * @param context (logger)
+     * @return
+     */
     @Override
     public Integer handleRequest(DynamodbEvent event, Context context) {
         context.getLogger().log("Received event: " + event);
         JSONObject jo;
-        SpotifyService spotify = new SpotifyService();
         DynamoDBService db = new DynamoDBService();
-        ArtistService artistService = new ArtistService();
-        String spotifyId;
-        String results = "";
+        SongService songService = new SongService();
+        String spotifyId, artist, results = "";
         for (DynamodbStreamRecord record : event.getRecords()) {
             context.getLogger().log(record.getEventID());
             context.getLogger().log(record.getEventName());
             if(record.getEventName().equals("INSERT")) {
+                // SuccessRecord will be a JSON that contains the new artist and their spotifyId
                 String successRecord = record.getDynamodb().toString();
                 jo = new JSONObject(successRecord);
-                String artist = jo.getString("artist");
-                context.getLogger().log("Artist found -" + artist);
-                Artist a = db.getMapper().load(Artist.class,artist);
-                if(a.getSpotifyId().length() > 0) {
-                    context.getLogger().log("Songs have already been queried for and exist in database.");
-                    continue;
-                }
-                spotifyId = spotify.searchForArtist(artist,context);
-                artistService.update(artist,spotifyId);
-                try {
-                    results = db.populateSongs();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                if(results.length() == 0){
-                    context.getLogger().log("No songs found for Artist - " + artist);
-                }
-                else {
+                artist = jo.getString("artist");
+                spotifyId = jo.getString("spotifyId");
+
+                // If the artist does not have any songs in the Song table, execute
+                if(!songService.isArtistHasSongs(artist)) {
+                    results = db.populateSongs(artist, spotifyId);
                     context.getLogger().log(results);
                 }
             }

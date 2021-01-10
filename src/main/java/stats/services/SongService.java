@@ -14,6 +14,9 @@ import stats.repository.SongRepository;
 
 import java.util.List;
 
+/**
+ * Handles all the business logic for the Song model
+ */
 @Service
 public class SongService implements SongRepository {
 
@@ -23,6 +26,11 @@ public class SongService implements SongRepository {
         mapper = new DynamoDBConfiguration().getMapper();
     }
 
+    /**
+     * Queries for the songs the artist has created.
+     * @param artist name of artist
+     * @return list of songs the Artist has created
+     */
     public PaginatedQueryList<Song> getSongsForArtist(String artist){
         final Song song = new Song();
         song.setArtist(artist);
@@ -34,10 +42,16 @@ public class SongService implements SongRepository {
         return results;
     }
 
+    /**
+     * Determines whether or not the Song table has a track with specific artist
+     * @param artist name of artist
+     * @return true if artist has songs, false if not
+     */
     public boolean isArtistHasSongs(String artist) {
-        return getSongsForArtist(artist).size() == 0;
+        return getSongsForArtist(artist).size() > 0;
     }
 
+    // Create a song based off the provided parameters
     public Song create(String artist, String track, String releaseDate, String externalUrl, AudioFeatures audioFeatures) {
         Song song = new Song();
         song.setAcousticness(audioFeatures.getAcousticness());
@@ -58,26 +72,43 @@ public class SongService implements SongRepository {
         return song;
     }
 
+    /**
+     * Insert a list of songs
+     * @param songs list of songs to insert
+     */
     public void save(List<Song> songs) {
         mapper.batchSave(songs);
         System.out.println("Successfully saved songs!");
     }
 
+    /**
+     * Insert a song to the database
+     * @param song to insert
+     */
     public void save(Song song){
         mapper.save(song);
         System.out.println("Successfully saved song!");
     }
 
+    /**
+     * Delete a list of songs
+     * @param songs list of songs to delete
+     */
     public void delete(List<Song> songs){
         mapper.batchDelete(songs);
         System.out.println("Successfully deleted song!");
     }
 
+    /**
+     * Delete a specific song
+     * @param song to delete
+     */
     public void delete(Song song){
         mapper.delete(song);
         System.out.println("Successfully deleted songs!");
     }
 
+    // method used locally to hide and delete tracks
     public void hide(){
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
         List<Song> scanResult = mapper.scan(Song.class,scanExpression);

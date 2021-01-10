@@ -1,8 +1,6 @@
 package stats.config;
 
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
@@ -13,19 +11,27 @@ import org.springframework.context.annotation.Configuration;
 import java.io.IOException;
 import java.util.Properties;
 
+/**
+ * Setup the connection to DynamoDB
+ */
 @Configuration
 public class DynamoDBConfiguration {
     private DynamoDB db;
     private DynamoDBMapper mapper;
     private GetPropertyValues properties;
     private Properties prop;
+    private AmazonDynamoDB client;
 
     public DynamoDBConfiguration() {
         try {
+            //Load in properties file
             properties = new GetPropertyValues();
+
+            //Get the properties object
             prop = properties.getPropValues();
-            AmazonDynamoDB client = configDBClientBuilder(prop.getProperty("env"), prop.getProperty("accessKey")
-                    , prop.getProperty("secretKey"), prop.getProperty("dynamoDBEndpoint"), prop.getProperty("awsRegion"));
+
+            //Configure DynamoDB Client
+            client = configDBClientBuilder(prop.getProperty("env"), prop.getProperty("dynamoDBEndpoint"), prop.getProperty("awsRegion"));
             this.mapper = new DynamoDBMapper(client);
             this.db = new DynamoDB(client);
         } catch (IOException e) {
@@ -41,7 +47,15 @@ public class DynamoDBConfiguration {
         return mapper;
     }
 
-    private AmazonDynamoDB configDBClientBuilder(String env, String accessKey, String secretKey, String db, String region) throws IOException {
+    /**
+     * This will create the connection the DynamoDB endpoint
+     *
+     * @param env    development/production environment
+     * @param db     endpoint for DynamoDB
+     * @param region region where DynamoDB is hosted
+     * @return AmazonDynamoDB Client
+     */
+    private AmazonDynamoDB configDBClientBuilder(String env, String db, String region) {
         //Development
         if (env.equals("development")) {
             return AmazonDynamoDBClientBuilder
@@ -53,16 +67,12 @@ public class DynamoDBConfiguration {
         return AmazonDynamoDBClientBuilder
                 .standard()
                 .withRegion(region)
-                .withCredentials(amazonAWSCredentials(accessKey, secretKey))
+                .withCredentials(new ProfileCredentialsProvider())
                 .build();
     }
 
-    private AwsClientBuilder.EndpointConfiguration amazonEndpointConfiguration(String db, String region) throws IOException {
+    private AwsClientBuilder.EndpointConfiguration amazonEndpointConfiguration(String db, String region) {
         return new AwsClientBuilder.EndpointConfiguration(db, region);
-    }
-
-    private AWSCredentialsProvider amazonAWSCredentials(String accessKey, String secretKey) throws IOException {
-        return new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey));
     }
 
 

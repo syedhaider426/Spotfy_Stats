@@ -12,93 +12,135 @@ import stats.repository.ArtistRepository;
 
 import java.util.*;
 
+/**
+ * Handles the business logic for the Artist model
+ */
 @Service
 public class ArtistService implements ArtistRepository {
 
     private DynamoDBMapper mapper;
 
-
-    public ArtistService(){
+    public ArtistService() {
         mapper = new DynamoDBConfiguration().getMapper();
     }
 
-    // Used to load in data
-    public Map<String,String> getAllArtists(){
-        Map<String,String> artists = new HashMap<>();
+    /**
+     * Get all the artists. This is used in populateSongs of the DynamoDBService.
+     * All artists are found and then check to see if they exist in the Songs table.
+     * @return map (name,spotifyId) of all the artists found
+     */
+    public Map<String, String> getAllArtists() {
+        Map<String, String> artists = new HashMap<>();
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
-        List<Artist> scanResult = mapper.scan(Artist.class,scanExpression);
-        for(Artist artist: scanResult){
-            artists.put(artist.getArtist(),artist.getSpotifyId());
+        List<Artist> scanResult = mapper.scan(Artist.class, scanExpression);
+        for (Artist artist : scanResult) {
+            artists.put(artist.getArtist(), artist.getSpotifyId());
         }
         return artists;
     }
 
-    // Used to populate autocomplete
-    public List<String> getArtists(){
+    /**
+     * Get all the artists that can be searched for in the autocomplete.
+     * Throw error if no artists can be found
+     * @return list of artists
+     */
+    public List<String> getArtists() {
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
-        List<Artist> scanResult = mapper.scan(Artist.class,scanExpression);
+        List<Artist> scanResult = mapper.scan(Artist.class, scanExpression);
         List<String> artists = new ArrayList<>();
-        if(artists.size() == 0)
+        if (artists.size() == 0)
             throw new ServerException("No artists were found. There was an error with the server.");
-        for(Artist artist: scanResult){
+        for (Artist artist : scanResult) {
             artists.add(artist.getArtist());
         }
         Collections.sort(artists);
         return artists;
     }
 
-
-    public boolean getArtist(String name){
-        Artist artist = mapper.load(Artist.class,name);
-        if(artist == null)
-            return false;
-        return true;
-    }
-
-    public void create(String name, String spotifyId){
-        mapper.save(new Artist(name,spotifyId));
-    }
-
-    public void create(String name){
-        boolean result = getArtist(name);
-        if(result) {
+    /**
+     * Creates an artist based off name. If artist exists or spotifyId is not found,
+     * throw an error
+     * @param name of artist
+     */
+    public void create(String name) {
+        Artist artist = mapper.load(Artist.class, name);
+        if (artist == null) {
             throw new ConflictException("Artist with name' " + name + "' already exists.");
         }
         String spotifyId = new SpotifyService().searchForArtist(name);
-        if(spotifyId.length() == 0)
+        if (spotifyId.length() == 0)
             throw new NotFoundException("Artist with name '" + name + "' was not found in the Spotify Api.");
-        mapper.save(new Artist(name,spotifyId));
+        mapper.save(new Artist(name, spotifyId));
+    }
+
+    /**
+     * Creates an artist from name and spotifyid
+     * @param name of artist
+     * @param spotifyId of artist
+     */
+    public void create(String name, String spotifyId) {
+        mapper.save(new Artist(name, spotifyId));
     }
 
 
-    public void create(Artist artist){
+    /**
+     * Creates one artist
+     *
+     * @param artist object
+     */
+    public void create(Artist artist) {
         mapper.save(artist);
     }
 
-    public void create(List<Artist> artist){
-        mapper.batchSave(artist);
+    /**
+     * Saves list of artists to databases
+     *
+     * @param artists list<Artist>
+     */
+    public void create(List<Artist> artists) {
+        mapper.batchSave(artists);
     }
 
-    public void update(String name, String spotifyId){
-        Artist artist = mapper.load(Artist.class,name);
+
+    /**
+     * Updates an artist in the database
+     *
+     * @param name      of artist
+     * @param spotifyId of artist - field that can be updated
+     */
+    public void update(String name, String spotifyId) {
+        Artist artist = mapper.load(Artist.class, name);
         artist.setArtist(spotifyId);
         mapper.save(artist);
     }
 
-    public void update(Artist artist){
+    /**
+     * Updates an artist in the database
+     *
+     * @param artist object
+     */
+    public void update(Artist artist) {
         mapper.save(artist);
     }
 
-    public void delete(String name){
-        Artist artist = mapper.load(Artist.class,name);
+    /**
+     * Deletes an artist from the database
+     *
+     * @param name of artist
+     */
+    public void delete(String name) {
+        Artist artist = mapper.load(Artist.class, name);
         mapper.delete(artist);
     }
 
-    public void delete(Artist artist){
+    /**
+     * Deletes an artist from the database
+     *
+     * @param artist object
+     */
+    public void delete(Artist artist) {
         mapper.delete(artist);
     }
-
-
 
 
 }

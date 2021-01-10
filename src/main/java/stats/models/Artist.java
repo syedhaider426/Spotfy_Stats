@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 /**
  * Model for artist
  */
-@JsonIgnoreProperties(ignoreUnknown=true)   // When an artist object is created, ignore any unknown properties
+@JsonIgnoreProperties(ignoreUnknown = true)   // When an artist object is created, ignore any unknown properties
 @DynamoDBTable(tableName = "Artist")    // Reference the table - Artist
 public class Artist {
 
@@ -18,20 +18,23 @@ public class Artist {
     private String spotifyId;
 
     // Empty constructor
-    public Artist() {}
+    public Artist() {
+    }
 
     /**
      * Constructor for Artist
-     * @param artist name of artist
+     *
+     * @param artist    name of artist
      * @param spotifyId spotify uri of artist
      */
-    public Artist(String artist, String spotifyId){
+    public Artist(String artist, String spotifyId) {
         this.artist = artist;
         this.spotifyId = spotifyId;
     }
 
     /**
      * Gets the artist
+     *
      * @return artist name
      */
     @DynamoDBHashKey(attributeName = "artist")
@@ -41,6 +44,7 @@ public class Artist {
 
     /**
      * Sets the artist
+     *
      * @param artist name
      */
     public void setArtist(String artist) {
@@ -49,6 +53,7 @@ public class Artist {
 
     /**
      * Gets the spotify uri for artist
+     *
      * @return artist spotifyId
      */
     @DynamoDBAttribute(attributeName = "spotifyId")
@@ -58,6 +63,7 @@ public class Artist {
 
     /**
      * Sets the spotify uri for an artist (uri is received via spotify api)
+     *
      * @param spotifyId
      */
     public void setSpotifyId(String spotifyId) {
@@ -66,6 +72,7 @@ public class Artist {
 
     /**
      * String representation of Artist model
+     *
      * @return printable Artist
      */
     @Override
