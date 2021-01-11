@@ -1,5 +1,6 @@
 package stats.controllers;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -15,11 +16,8 @@ import java.util.List;
 @RestController
 public class ArtistController {
 
+    @Autowired
     private ArtistService artistService;
-
-    public ArtistController() {
-        artistService = new ArtistService();
-    }
 
     /**
      * Gets all the available artists to search in the autocomplete feature
@@ -27,7 +25,7 @@ public class ArtistController {
      * @return
      */
     @GetMapping(value = "/allArtists")
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseStatus(HttpStatus.OK)
     public List<String> getArtists() {
         List<String> artists = artistService.getArtists();
         return artists;

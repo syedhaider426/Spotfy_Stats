@@ -6,8 +6,8 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
 import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
 import com.wrapper.spotify.model_objects.specification.AudioFeatures;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import stats.config.DynamoDBConfiguration;
 import stats.exceptions.ServerException;
 import stats.models.Song;
 import stats.repository.SongRepository;
@@ -20,11 +20,8 @@ import java.util.List;
 @Service
 public class SongService implements SongRepository {
 
-    private final DynamoDBMapper mapper;
-
-    public SongService(){
-        mapper = new DynamoDBConfiguration().getMapper();
-    }
+    @Autowired
+    private DynamoDBMapper mapper;
 
     /**
      * Queries for the songs the artist has created.

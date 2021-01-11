@@ -1,6 +1,5 @@
 package stats.repository;
 
-import org.springframework.stereotype.Repository;
 import stats.models.Artist;
 
 import java.util.List;
@@ -10,7 +9,6 @@ import java.util.Map;
  * Interface for ArtistRepository. These are the available methods that can be used
  * and are implemented in the ArtistService.
  */
-@Repository
 public interface ArtistRepository {
     Map<String,String> getAllArtists() throws Exception;
 

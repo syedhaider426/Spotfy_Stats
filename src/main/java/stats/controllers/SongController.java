@@ -1,6 +1,7 @@
 package stats.controllers;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import stats.models.Song;
@@ -14,6 +15,7 @@ import stats.services.SongService;
 @RestController
 public class SongController {
 
+    @Autowired
     private SongService songService;
 
     /**
@@ -22,7 +24,7 @@ public class SongController {
      * @return list of songs and their attributes
      */
     @GetMapping(value = "/info")
-    @ResponseStatus(HttpStatus.ACCEPTED)
+    @ResponseStatus(HttpStatus.OK)
     public PaginatedQueryList<Song> getSongs(@RequestParam("artist") String artist){
         PaginatedQueryList<Song> results = songService.getSongsForArtist(artist);
         return results;

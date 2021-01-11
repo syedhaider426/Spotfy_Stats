@@ -1,5 +1,6 @@
 package stats.services;
 
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Table;
@@ -10,8 +11,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import stats.config.DynamoDBConfiguration;
 import stats.models.Song;
 import stats.repository.DynamoDBRepository;
 
@@ -26,33 +27,18 @@ import java.util.*;
 @Service
 public class DynamoDBService implements DynamoDBRepository {
 
-    private DynamoDBConfiguration dynamoDBConfiguration;
+    @Autowired
+    private AmazonDynamoDB amazonDynamoDB;
+    @Autowired
     private DynamoDB db;
+    @Autowired
     private DynamoDBMapper mapper;
+    @Autowired
     private SpotifyService spotify;
-
-    public DynamoDBService() {
-        dynamoDBConfiguration = new DynamoDBConfiguration();
-        db = dynamoDBConfiguration.getDb();
-        mapper = dynamoDBConfiguration.getMapper();
-        spotify = new SpotifyService();
-    }
-
-    public DynamoDBConfiguration getDynamoDBConfiguration() {
-        return dynamoDBConfiguration;
-    }
-
-    public DynamoDB getDb() {
-        return db;
-    }
-
-    public DynamoDBMapper getMapper() {
-        return mapper;
-    }
-
-    public SpotifyService getSpotify() {
-        return spotify;
-    }
+    @Autowired
+    private SongService songService;
+    @Autowired
+    private ArtistService artistService;
 
     // Create the Song table
     public void createSongTable() {
@@ -128,10 +114,8 @@ public class DynamoDBService implements DynamoDBRepository {
         }
     }
 
-    // Method used locally to
+    // Method used locally to populate songs
     public void populateSongs() {
-        ArtistService artistService = new ArtistService();
-        SongService songService = new SongService();
         Map<String, String> artistsMap = artistService.getAllArtists();
         Map<String, String> artists = new HashMap<>();
         int songCounter = 0;
@@ -182,7 +166,7 @@ public class DynamoDBService implements DynamoDBRepository {
             songService.save(songs);
         }
         if (artists.size() == 0)
-            System.out.println("") ;
+            System.out.println() ;
         else
             System.out.println("Artists - " + artists.size() + "Songs - " + songCounter);
     }
@@ -194,7 +178,6 @@ public class DynamoDBService implements DynamoDBRepository {
      * @return success/failure message
      */
     public String populateSongs(String name, String spotifyId) {
-        SongService songService = new SongService();
 
         // Get albums created by artist - albums can represent a one or more songs
         List<String> albumReleases = spotify.getReleases(spotifyId);
@@ -215,10 +198,10 @@ public class DynamoDBService implements DynamoDBRepository {
         }
         List<String> trackList = new ArrayList<>();
 
-        /**
+        /*
          * A new list of tracks is returned from getSeveralTrackFeatures because
          * some songs do not have audio features
-         **/
+         */
         for (AudioFeatures track : audioFeatureList) {
             trackList.add(track.getId());
         }
@@ -247,9 +230,8 @@ public class DynamoDBService implements DynamoDBRepository {
 
     // Method used locally to load artists in from a 2D-array of artist/spotifyId
     public void populateArtists(String[][] artists) {
-        ArtistService a = new ArtistService();
-        for (int x = 0; x < artists.length; x++) {
-            a.create(artists[x][0], artists[x][1]);
+        for (String[] artist : artists) {
+            artistService.create(artist[0], artist[1]);
         }
     }
 

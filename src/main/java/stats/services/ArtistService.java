@@ -2,8 +2,8 @@ package stats.services;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBScanExpression;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import stats.config.DynamoDBConfiguration;
 import stats.exceptions.ConflictException;
 import stats.exceptions.NotFoundException;
 import stats.exceptions.ServerException;
@@ -16,13 +16,10 @@ import java.util.*;
  * Handles the business logic for the Artist model
  */
 @Service
-public class ArtistService implements ArtistRepository {
+public class ArtistService implements ArtistRepository{
 
+    @Autowired
     private DynamoDBMapper mapper;
-
-    public ArtistService() {
-        mapper = new DynamoDBConfiguration().getMapper();
-    }
 
     /**
      * Get all the artists. This is used in populateSongs of the DynamoDBService.
@@ -48,7 +45,7 @@ public class ArtistService implements ArtistRepository {
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
         List<Artist> scanResult = mapper.scan(Artist.class, scanExpression);
         List<String> artists = new ArrayList<>();
-        if (artists.size() == 0)
+        if (scanResult.size() == 0)
             throw new ServerException("No artists were found. There was an error with the server.");
         for (Artist artist : scanResult) {
             artists.add(artist.getArtist());
