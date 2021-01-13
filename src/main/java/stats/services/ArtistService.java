@@ -42,6 +42,7 @@ public class ArtistService implements ArtistRepository{
      * @return list of artists
      */
     public List<String> getArtists() {
+
         DynamoDBScanExpression scanExpression = new DynamoDBScanExpression();
         List<Artist> scanResult = mapper.scan(Artist.class, scanExpression);
         List<String> artists = new ArrayList<>();

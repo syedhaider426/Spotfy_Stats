@@ -6,6 +6,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.wrapper.spotify.SpotifyApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -63,13 +64,11 @@ public class DynamoDBConfiguration {
     }
 
     @Bean
-    public String spotifyClientId(){
-        return spotifyClientId;
-    }
-
-    @Bean
-    public String spotifyClientSecret(){
-        return spotifyClientSecret;
+    public SpotifyApi spotifyApi(){
+        return new SpotifyApi.Builder()
+                .setClientId(spotifyClientId)
+                .setClientSecret(spotifyClientSecret)
+                .build();
     }
 
 }

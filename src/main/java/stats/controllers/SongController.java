@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import stats.models.Song;
+import stats.repository.SongRepository;
 import stats.services.SongService;
 
 
@@ -16,7 +17,7 @@ import stats.services.SongService;
 public class SongController {
 
     @Autowired
-    private SongService songService;
+    private SongRepository songRepository;
 
     /**
      * Gets all the songs and related info for songs for a specific artist
@@ -26,7 +27,7 @@ public class SongController {
     @GetMapping(value = "/info")
     @ResponseStatus(HttpStatus.OK)
     public PaginatedQueryList<Song> getSongs(@RequestParam("artist") String artist){
-        PaginatedQueryList<Song> results = songService.getSongsForArtist(artist);
+        PaginatedQueryList<Song> results = songRepository.getSongsForArtist(artist);
         return results;
     }
 

@@ -14,10 +14,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class Artist {
 
 
+
     private String artist;
     private String spotifyId;
 
-    // Empty constructor
+    // Default constructor is required by AWS DynamoDB SDK
     public Artist() {
     }
 

@@ -29,7 +29,7 @@ public class Song {
     private float tempo;
     private boolean hidden;
 
-
+    // Default constructor is required by AWS DynamoDB SDK
     public Song() {
     }
 

@@ -13,8 +13,8 @@ import com.wrapper.spotify.requests.data.search.SearchItemRequest;
 import com.wrapper.spotify.requests.data.tracks.GetAudioFeaturesForSeveralTracksRequest;
 import com.wrapper.spotify.requests.data.tracks.GetSeveralTracksRequest;
 import org.apache.hc.core5.http.ParseException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import stats.config.GetPropertyValues;
 
 import java.io.IOException;
 import java.util.*;
@@ -27,27 +27,8 @@ import java.util.stream.Collectors;
 @Service
 public class SpotifyService {
 
-
+    @Autowired
     private SpotifyApi spotifyApi;
-
-    public SpotifyService() {
-        try {
-            GetPropertyValues properties = new GetPropertyValues();
-            Properties prop = properties.getPropValues();
-            this.spotifyApi = new SpotifyApi.Builder()
-                    .setClientId(prop.getProperty("spotifyClientId"))
-                    .setClientSecret(prop.getProperty("spotifyClientSecret"))
-                    .build();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-
-    }
-
-    public SpotifyApi getSpotifyApi() {
-        return spotifyApi;
-    }
-
 
     /**
      * Search for the artist in Spotify Api
@@ -55,7 +36,7 @@ public class SpotifyService {
      * @return the spotify id of the artist
      */
     public String searchForArtist(String artist){
-        this.spotifyApi = setToken();
+        spotifyApi = setToken();
         // Build request to search for artist
         SearchItemRequest searchItemRequest = spotifyApi
                 .searchItem(artist,"artist")
@@ -83,6 +64,7 @@ public class SpotifyService {
      */
     public List<String> getReleases(String artistId) {
         System.out.println("Getting album releases");
+        spotifyApi = setToken();
         List<String> albumsList = new ArrayList<>();
         boolean counter = false;
         int offset = 0;
