@@ -6,7 +6,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import stats.models.Artist;
 import stats.repository.ArtistRepository;
-import stats.services.ArtistService;
 
 import java.util.List;
 
