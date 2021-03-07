@@ -1,9 +1,10 @@
 FROM openjdk:8-jre-alpine
 
 EXPOSE 8080
-
+ARG CACHEBUST=1
 RUN pwd
 RUN echo "$PWD"
+RUN echo "$CACHEBUST"
 COPY . /usr/app/
 WORKDIR /usr/app
 RUN ls -a
