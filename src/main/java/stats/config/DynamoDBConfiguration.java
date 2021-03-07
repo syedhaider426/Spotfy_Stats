@@ -20,10 +20,10 @@ public class DynamoDBConfiguration {
     @Value("${aws.env}")
     private String env;
 
-    @Value("${aws.region}")
+    @Value("${aws.region:#{null}}")
     private String region;
 
-    @Value("${aws.endpoint}")
+    @Value("${aws.endpoint:#{null}}")
     private String endpoint;
 
     @Value("${spotify.clientId")

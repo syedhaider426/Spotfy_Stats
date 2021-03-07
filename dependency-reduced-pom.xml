@@ -33,6 +33,9 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <mainClass>${start-class}</mainClass>
+        </configuration>
       </plugin>
     </plugins>
   </build>
@@ -66,10 +69,6 @@
         <exclusion>
           <artifactId>spring-boot-test-autoconfigure</artifactId>
           <groupId>org.springframework.boot</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>json-path</artifactId>
-          <groupId>com.jayway.jsonpath</groupId>
         </exclusion>
         <exclusion>
           <artifactId>jakarta.xml.bind-api</artifactId>
@@ -121,5 +120,8 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+  <properties>
+    <start-class>stats.Main</start-class>
+  </properties>
 </project>
 
