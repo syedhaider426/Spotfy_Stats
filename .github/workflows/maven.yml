@@ -16,6 +16,9 @@ jobs:
 
     steps:
     -
+      name: Checkout
+      uses: actions/checkout@v2
+    -
       name: Set up QEMU
       uses: docker/setup-qemu-action@v1
     -
@@ -42,6 +45,7 @@ jobs:
       with:
         push: true
         tags: shayder426/spotify-stats-01:latest
+        context: .
     -
       name: Image digest
       run: echo ${{ steps.docker_build.outputs.digest }}
