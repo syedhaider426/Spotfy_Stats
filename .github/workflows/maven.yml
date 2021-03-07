@@ -39,6 +39,10 @@ jobs:
       name: Build with Maven
       run: mvn -B package --file pom.xml
     -
+      name: Move to Target
+      run: |
+        cd target
+    -
       name: Build and push
       id: docker_build
       uses: docker/build-push-action@v2
