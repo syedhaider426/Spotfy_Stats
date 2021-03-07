@@ -23,13 +23,13 @@ jobs:
       with:
         java-version: 1.8
     - 
-      name: Build with Maven
+      name: 3. Build with Maven
       run: mvn -B package --file pom.xml
     -
-      name: List the current directory
+      name: 4. List the current directory
       run: ls -a
     -
-      name: What is in the target folder?
+      name: 5. What is in the target folder?
       run: |
         cd target
-        ls - a
+        ls -a
