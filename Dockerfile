@@ -1,4 +1,5 @@
 FROM openjdk:8-jre-alpine
 EXPOSE 8080
-COPY . /applications
+RUN cd target
+COPY Stats-1.0.0.jar /applications
 ENTRYPOINT ["java", "-jar", "Stats-1.0.0.jar"]
