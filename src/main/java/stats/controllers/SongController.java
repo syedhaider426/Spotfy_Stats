@@ -6,13 +6,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import stats.models.Song;
 import stats.repository.SongRepository;
-import stats.services.SongService;
 
 
 /**
  * Handles all the requests to any endpoints related to Songs
  */
-@CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 public class SongController {
 
