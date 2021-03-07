@@ -22,17 +22,6 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    - 
-      name: 3. Build with Maven
-      run: mvn -B package --file pom.xml
-    -
-      name: 4. List the current directory
-      run: ls -a
-    -
-      name: 5. What is in the target folder?
-      run: |
-        cd target
-        ls -a
     -
       name: Set up QEMU
       uses: docker/setup-qemu-action@v1
@@ -45,6 +34,9 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - 
+      name: Build with Maven
+      run: mvn -B package --file pom.xml
     -
       name: Build and push
       id: docker_build
