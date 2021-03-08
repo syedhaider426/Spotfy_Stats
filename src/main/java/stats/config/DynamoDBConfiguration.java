@@ -1,5 +1,7 @@
 package stats.config;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -26,6 +28,12 @@ public class DynamoDBConfiguration {
     @Value("${aws.endpoint:#{null}}")
     private String endpoint;
 
+    @Value("${aws.accessKey:#{null}}")
+    private String accessKey;
+
+    @Value("${aws.secretKey:#{null}}")
+    private String secretKey;
+
     @Value("${spotify.clientId")
     private String spotifyClientId;
 
@@ -49,7 +57,7 @@ public class DynamoDBConfiguration {
         //Production
         return AmazonDynamoDBClientBuilder
                 .standard()
-                .withCredentials(new ProfileCredentialsProvider())
+                .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey,secretKey)))
                 .build();
     }
 
