@@ -6,6 +6,8 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import java.util.Objects;
+
 /**
  * Model for artist
  */
@@ -82,5 +84,21 @@ public class Artist {
                 "artist='" + artist + '\'' +
                 ", spotifyId='" + spotifyId + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Artist artist1 = (Artist) o;
+        return artist.equals(artist1.artist) &&
+                spotifyId.equals(artist1.spotifyId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(artist, spotifyId);
     }
 }

@@ -40,8 +40,9 @@ public class ArtistController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public void createArtist(@RequestBody Artist artist) {
+    public String createArtist(@RequestBody Artist artist) {
         artistRepository.create(artist.getArtist());
+        return "Succesfully created artist";
     }
 
 }

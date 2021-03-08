@@ -21,6 +21,9 @@ public class ArtistService implements ArtistRepository{
     @Autowired
     private DynamoDBMapper mapper;
 
+    @Autowired
+    private SpotifyService spotifyApi;
+
     /**
      * Get all the artists. This is used in populateSongs of the DynamoDBService.
      * All artists are found and then check to see if they exist in the Songs table.
@@ -65,7 +68,7 @@ public class ArtistService implements ArtistRepository{
         if (artist != null) {
             throw new ConflictException("Artist with name' " + name + "' already exists.");
         }
-        String spotifyId = new SpotifyService().searchForArtist(name);
+        String spotifyId = spotifyApi.searchForArtist(name);
         if (spotifyId.length() == 0)
             throw new NotFoundException("Artist with name '" + name + "' was not found in the Spotify Api.");
         mapper.save(new Artist(name, spotifyId));

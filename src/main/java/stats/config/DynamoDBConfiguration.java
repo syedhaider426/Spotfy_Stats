@@ -2,7 +2,6 @@ package stats.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
@@ -34,10 +33,10 @@ public class DynamoDBConfiguration {
     @Value("${aws.secretKey:#{null}}")
     private String secretKey;
 
-    @Value("${spotify.clientId")
+    @Value("${spotifyClientId}")
     private String spotifyClientId;
 
-    @Value("${spotify.clientSecret")
+    @Value("${spotifyClientSecret}")
     private String spotifyClientSecret;
 
     /**
