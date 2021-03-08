@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.*;
 import stats.models.Artist;
 import stats.repository.ArtistRepository;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Handles all the requests to any endpoints related to Artists
@@ -35,14 +37,15 @@ public class ArtistController {
      * Post request that creates an artist
      *
      * @param artist name of artist
+     * @return successful response
      */
     @PostMapping(path = "/api/artist",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public String createArtist(@RequestBody Artist artist) {
+    public Map<String, String> createArtist(@RequestBody Artist artist) {
         artistRepository.create(artist.getArtist());
-        return "Succesfully created artist";
+        return Collections.singletonMap("response","Succesfully created artist");
     }
 
 }
