@@ -23,7 +23,7 @@ public class SongController {
      * @param artist name of artists
      * @return list of songs and their attributes
      */
-    @GetMapping(value = "/info")
+    @GetMapping(value = "/api/info")
     @ResponseStatus(HttpStatus.OK)
     public PaginatedQueryList<Song> getSongs(@RequestParam("artist") String artist){
         PaginatedQueryList<Song> results = songRepository.getSongsForArtist(artist);

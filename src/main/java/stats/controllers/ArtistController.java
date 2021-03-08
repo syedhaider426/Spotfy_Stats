@@ -24,7 +24,7 @@ public class ArtistController {
      *
      * @return
      */
-    @GetMapping(value = "/allArtists")
+    @GetMapping(value = "/api/allArtists")
     @ResponseStatus(HttpStatus.OK)
     public List<String> getArtists() {
         List<String> artists = artistRepository.getArtists();
@@ -36,7 +36,7 @@ public class ArtistController {
      *
      * @param artist name of artist
      */
-    @PostMapping(path = "/artist",
+    @PostMapping(path = "/api/artist",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
