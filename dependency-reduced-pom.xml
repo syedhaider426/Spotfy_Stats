@@ -121,7 +121,7 @@
     </dependencies>
   </dependencyManagement>
   <properties>
-    <start-class>stats.Main</start-class>
+    <start-class>Main</start-class>
   </properties>
 </project>
 
