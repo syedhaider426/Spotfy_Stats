@@ -62,7 +62,7 @@ public class ArtistService implements ArtistRepository{
      */
     public void create(String name) {
         Artist artist = mapper.load(Artist.class, name);
-        if (artist == null) {
+        if (artist != null) {
             throw new ConflictException("Artist with name' " + name + "' already exists.");
         }
         String spotifyId = new SpotifyService().searchForArtist(name);
