@@ -50,7 +50,12 @@ public class SpotifyService {
             if(artists.length == 0){
                 return "";
             }
-            return artists[0].getId();
+            for(Artist item: artists){
+                if(item.getName().toLowerCase().equals(artist)){
+                    return item.getId();
+                }
+            }
+            return "";
         } catch (ParseException | SpotifyWebApiException | IOException e) {
             e.printStackTrace();
         }
