@@ -51,7 +51,7 @@ public class SpotifyService {
                 return "";
             }
             for(Artist item: artists){
-                if(item.getName().toLowerCase().equals(artist)){
+                if(item.getName().toLowerCase().equals(artist.toLowerCase())){
                     return item.getId();
                 }
             }
